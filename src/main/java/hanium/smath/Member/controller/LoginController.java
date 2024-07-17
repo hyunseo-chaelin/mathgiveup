@@ -2,7 +2,7 @@ package hanium.smath.Member.controller;
 
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.service.GoogleLoginService;
-import hanium.smath.Member.service.MemberService;
+import hanium.smath.Member.service.LoginService;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -13,30 +13,17 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/members")
-public class MemberController {
+public class LoginController {
 
-    private MemberService memberService;
+    private LoginService loginService;
     private final GoogleLoginService googleLoginService;
 
     @Autowired
-    public MemberController(MemberService memberService, GoogleLoginService googleLoginService) {
-        this.memberService = memberService; // controller가 생성될 때 service 주입하기
+    public LoginController(LoginService loginService, GoogleLoginService googleLoginService) {
+        this.loginService = loginService; // controller가 생성될 때 service 주입하기
         System.out.println("MemberController instantiated with MemberService");
         this.googleLoginService = googleLoginService;
         System.out.println("MemberController instantiated with googleLoginService");
-    }
-
-    @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody Member member) {
-        System.out.println("RequestBody received: " + member);
-        try {
-            String memberId = memberService.createMember(member);
-            return ResponseEntity.ok("Member created with ID: " + memberId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            return ResponseEntity.status(500).body("Error creating member: " + e.getMessage());
-        }
     }
 
     @PostMapping("/login")
@@ -54,7 +41,7 @@ public class MemberController {
         try {
             System.out.println("Login request received for ID: " + member.getLogin_id());
 
-            Member infoMember = memberService.getMemberById(member.getLogin_id());
+            Member infoMember = loginService.getMemberById(member.getLogin_id());
 
             if(infoMember != null) {
                 if (infoMember.getLogin_pwd().equals(member.getLogin_pwd())) {
