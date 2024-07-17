@@ -71,17 +71,6 @@ public class MemberService {
         }
     }
 
-    public Member getMemberByEmail(String email) throws ExecutionException, InterruptedException {
-        Query query = firestore.collection("Members").whereEqualTo("email", email);
-        ApiFuture<QuerySnapshot> querySnapshot = query.get();
-        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-
-        if (!documents.isEmpty()) {
-            return documents.get(0).toObject(Member.class);
-        }
-        return null;
-    }
-
     public Member getMemberByNickname(String nickname) throws ExecutionException, InterruptedException {
         Query query = firestore.collection("Members").whereEqualTo("nickname", nickname);
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
@@ -94,9 +83,9 @@ public class MemberService {
     }
 
     public String createMember(Member member) throws ExecutionException, InterruptedException, TimeoutException {
-        if (getMemberByEmail(member.getEmail()) != null) {
-            throw new IllegalArgumentException("Email already exists");
-        }
+//        if (getMemberByEmail(member.getEmail()) != null) {
+//            throw new IllegalArgumentException("Email already exists");
+//        }
 
         if (getMemberByNickname(member.getNickname()) != null) {
             throw new IllegalArgumentException("Nickname already exists");
@@ -108,49 +97,25 @@ public class MemberService {
         return result.get().getId();
     }
 
-    public void verifyEmail(String email) throws ExecutionException, InterruptedException, TimeoutException {
-        Member member = getMemberByEmail(email);
-        if (member != null) {
-            member.setEmailVerified(true);
-            save(member);
-        }
-    }
-
-    public String initiateEmailVerification(String email) throws ExecutionException, InterruptedException, TimeoutException {
-        Member member = getMemberByEmail(email);
-        if (member != null) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        Member newMember = new Member();
-        newMember.setEmail(email);
-        newMember.setEmailVerified(false);
-        save(newMember);
-
-        // 이메일 인증 토큰 생성 및 이메일 전송 로직을 추가할 수 있습니다.
-
-        return "Verification email sent";
-    }
-
-    public String completeRegistration(Member member) throws ExecutionException, InterruptedException, TimeoutException {
-        Member existingMember = getMemberByEmail(member.getEmail());
-        if (existingMember != null) {
-            if (existingMember.isEmailVerified()) {
-                throw new IllegalArgumentException("This email is already registered. Please log in.");
-            } else {
-                throw new IllegalArgumentException("Email not verified");
-            }
-        }
-
-        if (getMemberByNickname(member.getNickname()) != null) {
-            throw new IllegalArgumentException("Nickname already exists");
-        }
-
-        // 새로운 회원 객체 생성
-        member.setEmailVerified(true);
-        save(member);
-
-        return member.getLogin_id();
-    }
+//    public String completeRegistration(Member member) throws ExecutionException, InterruptedException, TimeoutException {
+//        Member existingMember = getMemberByEmail(member.getEmail());
+//        if (existingMember != null) {
+//            if (existingMember.isEmailVerified()) {
+//                throw new IllegalArgumentException("This email is already registered. Please log in.");
+//            } else {
+//                throw new IllegalArgumentException("Email not verified");
+//            }
+//        }
+//
+//        if (getMemberByNickname(member.getNickname()) != null) {
+//            throw new IllegalArgumentException("Nickname already exists");
+//        }
+//
+//        // 새로운 회원 객체 생성
+//        member.setEmailVerified(true);
+//        save(member);
+//
+//        return member.getLogin_id();
+//    }
 
 }

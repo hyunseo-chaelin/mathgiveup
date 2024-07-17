@@ -50,6 +50,11 @@ dependencies {
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.32.1'
     implementation 'com.google.oauth-client:google-oauth-client:1.32.1'
     implementation 'com.google.http-client:google-http-client-jackson2:1.40.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'com.google.firebase:firebase-admin:8.0.0'
+    implementation 'jakarta.mail:jakarta.mail-api:2.0.0'
+    implementation 'com.sun.mail:jakarta.mail:1.6.5'
 }
 
 tasks.named('test') {

@@ -2,6 +2,8 @@ package hanium.smath.Member.entity;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,7 +16,7 @@ public class Member {
     private String login_id;
     private String login_pwd;
     private String nickname;
-    private String birthDate;
+    private LocalDate birthDate;
     private int grade;
     private boolean emailVerified;
 

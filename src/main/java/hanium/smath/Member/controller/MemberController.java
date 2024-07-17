@@ -100,31 +100,4 @@ public class MemberController {
         }
     }
 
-
-
-    @PostMapping("/initiate-email-verification")
-    public ResponseEntity<String> initiateEmailVerification(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        try {
-            String result = memberService.initiateEmailVerification(email);
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            return ResponseEntity.status(500).body("Error initiating email verification: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/complete-registration")
-    public ResponseEntity<String> completeRegistration(@RequestBody Member member) {
-        try {
-            String memberId = memberService.completeRegistration(member);
-            return ResponseEntity.ok("Member registered with ID: " + memberId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            return ResponseEntity.status(500).body("Error completing registration: " + e.getMessage());
-        }
-    }
 }
