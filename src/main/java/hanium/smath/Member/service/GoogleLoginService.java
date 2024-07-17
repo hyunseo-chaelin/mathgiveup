@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class GoogleLoginService {
 
     @Autowired
-    private MemberService memberService;
+    private LoginService loginService;
 
     @Autowired
     private GoogleIdTokenVerifierService googleIdTokenVerifier;
@@ -32,7 +32,7 @@ public class GoogleLoginService {
         System.out.println("Email: " + email);
         System.out.println("Name: " + name);
 
-        Member member = memberService.findByGoogleId(userId);
+        Member member = loginService.findByGoogleId(userId);
 
         if(member == null) {
             System.out.println("No existing member found. Creating new member.");
@@ -43,7 +43,7 @@ public class GoogleLoginService {
             member.setNickname(name);
             member.setLogin_id(email);
             member.setEmailVerified(true);
-            memberService.save(member);
+            loginService.save(member);
         } else {
             System.out.println("Existing member found: " + member.getNickname());
         }
