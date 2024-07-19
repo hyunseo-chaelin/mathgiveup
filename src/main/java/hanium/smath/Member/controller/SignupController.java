@@ -1,36 +1,46 @@
 package hanium.smath.Member.controller;
 
 import hanium.smath.Member.entity.Member;
-import java.util.concurrent.*;
-
 import hanium.smath.Member.service.SignupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/signup")
 public class SignupController {
-
-    private SignupService signupService;
+    private final SignupService signupService;
 
     @Autowired
     public SignupController(SignupService signupService) {
-        this.signupService = signupService; // controller가 생성될 때 service 주입하기
-        System.out.println("MemberController instantiated with MemberService");
+        this.signupService = signupService;
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody Member member) {
-        System.out.println("RequestBody received: " + member);
-        try {
-            String memberId = signupService.createMember(member);
-            return ResponseEntity.ok("Member created with ID: " + memberId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            return ResponseEntity.status(500).body("Error creating member: " + e.getMessage());
+    @PostMapping("/check-email")
+    public String checkEmail(@RequestParam String email) {
+        if (signupService.checkEmailExists(email)) {
+            return "Email already exists";
+        } else {
+            signupService.sendVerificationCode(email);
+            return "Verification code sent";
+        }
+    }
+
+    @PostMapping("/verify-email")
+    public String verifyEmail(@RequestParam String email, @RequestParam String code) {
+        if (signupService.verifyEmailCode(email, code)) {
+            return "Email verified";
+        } else {
+            return "Invalid verification code";
+        }
+    }
+
+    @PostMapping("/register")
+    public String registerMember(@RequestBody Member member) {
+        if (signupService.checkEmailExists(member.getEmail())) {
+            return "Email already exists";
+        } else {
+            signupService.registerMember(member);
+            return "Member registered successfully";
         }
     }
 }
