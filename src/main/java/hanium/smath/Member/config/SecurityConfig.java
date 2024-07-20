@@ -27,17 +27,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/members/login", "/api/members/signup", "/api/members/google-login",
-                                "/api/members/initiate-email-verification", "/api/members/complete-registration").permitAll() // 이메일 인증 및 회원가입 경로 추가).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .permitAll()
+//                        .requestMatchers("/api/members/**").permitAll() // 이메일 인증 및 회원가입 경로 추가).permitAll()
+                        .anyRequest().permitAll()
                 );
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout
+//                        .permitAll()
+//                );
         System.out.println("SecurityFilterChain configured.");
         return http.build();
 
