@@ -2,7 +2,9 @@ package hanium.smath.Member.entity;
 
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -16,7 +18,7 @@ public class Member {
     private String login_id;
     private String login_pwd;
     private String nickname;
-    private LocalDate birthDate;
+    private String birthDate;
     private int grade;
     private boolean emailVerified;
 

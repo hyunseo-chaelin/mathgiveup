@@ -1,6 +1,7 @@
 package hanium.smath.Member.service;
 import com.google.cloud.firestore.*;
 import hanium.smath.Member.entity.Member;
+import hanium.smath.Member.repository.LoginRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
@@ -11,12 +12,15 @@ import com.google.api.core.ApiFuture;
 public class LoginService {
 
     private final Firestore firestore;
+    private final LoginRepository loginRepository;
 
     @Autowired
-    public LoginService(Firestore firestore) {
+    public LoginService(Firestore firestore, LoginRepository loginRepository) {
         this.firestore = firestore; // memberservice 클래스 생성될 때 firestore 객체 주입
         // System.out.println("MemberService instantiated with Firestore");
+        this.loginRepository = loginRepository;
     }
+
 
     public Member getMemberById(String id) throws ExecutionException, InterruptedException, TimeoutException {
         try {
@@ -68,6 +72,32 @@ public class LoginService {
             System.err.println("Error saving member: " + ex.getMessage());
             ex.printStackTrace();
             throw ex;
+        }
+    }
+
+    public String findLoginId(String email, String birthDate) throws ExecutionException, InterruptedException {
+        System.out.println("Searching for login ID with email: " + email + " and birthDate: " + birthDate);
+
+        Member member = loginRepository.findByEmailAndBirthDate(email, birthDate);
+        if (member != null) {
+            System.out.println("Found member with login ID: " + member.getLogin_id());
+            return member.getLogin_id();
+        } else {
+            System.out.println("No member found with provided email and birth date.");
+            throw new RuntimeException("No member found with provided email and birth date.");
+        }
+    }
+
+    public String findLoginPwd(String login_id) throws ExecutionException, InterruptedException {
+        System.out.println("Searching for pwd with login_id: " + login_id);
+
+        Member member = loginRepository.findByLoginId(login_id);
+
+        if (member != null) {
+            System.out.println("Found member with login ID: " + member.getLogin_id());
+            return member.getLogin_pwd();
+        } else {
+            throw new IllegalArgumentException("Invalid login_id: " + login_id);
         }
     }
 }
