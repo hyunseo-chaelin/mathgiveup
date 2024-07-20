@@ -63,18 +63,10 @@ public class LoginRepository {
 
         if (documents.isEmpty()) {
             System.out.println("No user found.");
-            throw new RuntimeException("No user found.");
+            return null;
         }
 
-        for (QueryDocumentSnapshot document : documents) {
-            Member member = document.toObject(Member.class);
-            System.out.println("Checking document: " + document.getId());
-            if (member.getLogin_id().equals(loginId)) {
-                System.out.println("Found matching member: " + member.getLogin_id());
-                return member;
-            }
-        }
         System.out.println("No matching member found for login ID: " + loginId);
-        throw new RuntimeException("No matching member found for login ID: " + loginId);
+        return documents.get(0).toObject(Member.class);
     }
 }
