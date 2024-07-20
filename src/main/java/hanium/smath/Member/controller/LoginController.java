@@ -4,18 +4,12 @@ import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.service.GoogleLoginService;
 import hanium.smath.Member.service.LoginService;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.TimeZone;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.servlet.view.RedirectView;
+
 
 @RestController
 @RequestMapping("/api/members")
@@ -98,9 +92,9 @@ public class LoginController {
         System.out.println("Received request to find login ID");
 
         try {
-            String loginId = loginService.findLoginId(email,birthDate);
-            System.out.println("Found ID: " + loginId);
-            return ResponseEntity.ok("Found ID! ID: " + loginId);
+            String login_id = loginService.findLoginId(email,birthDate);
+            System.out.println("Found ID: " + login_id);
+            return ResponseEntity.ok("Found ID! ID: " + login_id);
         } catch (RuntimeException | ExecutionException | InterruptedException e) {
             System.err.println("Error finding login ID: " + e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -108,15 +102,19 @@ public class LoginController {
     }
 
     @PostMapping("/reset/password")
-    public RedirectView resetPassword(@RequestParam String loginId) {
+    public ResponseEntity resetPassword(@RequestParam String login_id) {
         try {
-            String password = loginService.findLoginPwd(loginId);
-            return new RedirectView("/api/members/password-reset-page?loginId=" + loginId); // 비밀번호 재설정 페이지로 이동
-        } catch (IllegalArgumentException e) {
-            return new RedirectView("/api/members/find/loginId"); // ID 찾기 페이지로 리다이렉트
+            boolean userExists = loginService.checkUserExists(login_id);
+            if (userExists) {
+                System.out.println("Find");
+                return ResponseEntity.ok("User exists. Proceed to send reset email.");
+            } else {
+                System.out.println("No Found");
+                return ResponseEntity.status(302).header("Location", "/api/members/find/loginId").build();
+            }
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            return new RedirectView("/error"); // 서버 오류 페이지로 리다이렉트
+            System.err.println("Error resetting password: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error occurred while checking user existence: " + e.getMessage());
         }
     }
 }

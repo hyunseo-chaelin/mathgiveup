@@ -88,16 +88,9 @@ public class LoginService {
         }
     }
 
-    public String findLoginPwd(String login_id) throws ExecutionException, InterruptedException {
-        System.out.println("Searching for pwd with login_id: " + login_id);
-
-        Member member = loginRepository.findByLoginId(login_id);
-
-        if (member != null) {
-            System.out.println("Found member with login ID: " + member.getLogin_id());
-            return member.getLogin_pwd();
-        } else {
-            throw new IllegalArgumentException("Invalid login_id: " + login_id);
-        }
+    public boolean checkUserExists(String loginId) throws ExecutionException, InterruptedException {
+        System.out.println("Checking if user exists with login ID: " + loginId);
+        Member member = loginRepository.findByLoginId(loginId);
+        return member != null;
     }
 }
