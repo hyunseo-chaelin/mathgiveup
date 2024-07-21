@@ -1,6 +1,9 @@
 package hanium.smath.Member.controller;
 
+import hanium.smath.Member.dto.AuthResponse;
+import hanium.smath.Member.dto.LoginRequest;
 import hanium.smath.Member.entity.Member;
+import hanium.smath.Member.security.JwtUtil;
 import hanium.smath.Member.service.GoogleLoginService;
 import hanium.smath.Member.service.LoginService;
 
@@ -17,53 +20,85 @@ public class LoginController {
 
     private LoginService loginService;
     private final GoogleLoginService googleLoginService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public LoginController(LoginService loginService, GoogleLoginService googleLoginService) {
+    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil) {
         this.loginService = loginService; // controller가 생성될 때 service 주입하기
         System.out.println("MemberController instantiated with MemberService");
         this.googleLoginService = googleLoginService;
         System.out.println("MemberController instantiated with googleLoginService");
+        this.jwtUtil = jwtUtil;
+        System.out.println("MemberController instantiated with jwtUtil");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Member member) {
-        System.out.println("RequestBody received: " + member);
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
+        System.out.println("RequestBody received: " + loginRequest);
 
-        if(member.getLogin_id() == null || member.getLogin_id().isEmpty()) {
-            return ResponseEntity.badRequest().body("Login_id is empty.");
+        if(loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
+            System.out.println("Login_id is empty.");
+            return ResponseEntity.badRequest().body(new AuthResponse("Login_id is empty.", null, null));
         }
 
-        if(member.getLogin_pwd() == null || member.getLogin_pwd().isEmpty()) {
-            return ResponseEntity.badRequest().body("Login_pwd is empty.");
+        if(loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
+            System.out.println("Login_pwd is empty.");
+            return ResponseEntity.badRequest().body(new AuthResponse("Login_pwd is empty.", null, null));
         }
 
-        try {
-            System.out.println("Login request received for ID: " + member.getLogin_id());
+            try {
+                System.out.println("Login request received for ID: " + loginRequest.getLogin_id());
+                Member infoMember = loginService.getMemberById(loginRequest.getLogin_id());
 
-            Member infoMember = loginService.getMemberById(member.getLogin_id());
+                if (infoMember != null) {
+                    System.out.println("Member found : " + loginRequest.getLogin_id());
+                    if (infoMember.getLogin_pwd().equals(loginRequest.getLogin_pwd())) {
+                        String token;
+                        if (loginRequest.isAutoLogin()) {
+                            System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLogin_id());
+                            token = jwtUtil.generateTokenWithExtendedExpiry(infoMember.getLogin_id());
+                        } else {
+                            System.out.println("Generating token for ID: " + loginRequest.getLogin_id());
+                            token = jwtUtil.generateToken(infoMember.getLogin_id());
+                        }
+                        AuthResponse response = new AuthResponse("Login successful", infoMember.getNickname(), token);
 
-            if(infoMember != null) {
-                if (infoMember.getLogin_pwd().equals(member.getLogin_pwd())) {
-                    System.out.println("Login successful for ID: " + member.getLogin_id());
-                    return ResponseEntity.ok("Login successful ! Nickname : " + infoMember.getNickname());
+                        System.out.println("Login successful for ID: " + loginRequest.getLogin_id());
+                        return ResponseEntity.ok(response);
+                    } else {
+                        System.out.println("Invalid login_pwd for ID: " + loginRequest.getLogin_id());
+                        return ResponseEntity.status(401).body(new AuthResponse("Invalid login_pwd.", null, null));
+                    }
                 } else {
-                    System.out.println("Login failed for Password: " + member.getLogin_id());
-                    return ResponseEntity.ok("Invalid password");
+                    System.out.println("Invalid login_id: " + loginRequest.getLogin_id());
+                    return ResponseEntity.status(401).body(new AuthResponse("Invalid login_id.", null, null));
                 }
-            } else {
-                System.out.println("Login failed for ID: " + member.getLogin_id());
-                return ResponseEntity.status(401).body("Login faild for ID");
+            } catch (Exception e) {
+                System.err.println("Error during login: " + e.getMessage());
+                return ResponseEntity.status(500).body(new AuthResponse("Error during login: " + e.getMessage(), null, null));
             }
-        } catch (ExecutionException | InterruptedException e) { // 비동기 및 스레드 오류
-            System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
-        } catch (IllegalArgumentException e) { // 메서드가 잘못된 인수로 인한 오류
-            System.err.println("Error: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
-        }
+
+//            if(infoMember != null) {
+//                if (infoMember.getLogin_pwd().equals(member.getLogin_pwd())) {
+//                    System.out.println("Login successful for ID: " + member.getLogin_id());
+//                    return ResponseEntity.ok("Login successful ! Nickname : " + infoMember.getNickname());
+//                } else {
+//                    System.out.println("Login failed for Password: " + member.getLogin_id());
+//                    return ResponseEntity.ok("Invalid password");
+//                }
+//            } else {
+//                System.out.println("Login failed for ID: " + member.getLogin_id());
+//                return ResponseEntity.status(401).body("Login faild for ID");
+//            }
+//        } catch (ExecutionException | InterruptedException e) { // 비동기 및 스레드 오류
+//            System.err.println("Error during login: " + e.getMessage());
+//            return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
+//        } catch (IllegalArgumentException e) { // 메서드가 잘못된 인수로 인한 오류
+//            System.err.println("Error: " + e.getMessage());
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        } catch (TimeoutException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @PostMapping("/google-login")
@@ -117,4 +152,21 @@ public class LoginController {
             return ResponseEntity.status(500).body("Error occurred while checking user existence: " + e.getMessage());
         }
     }
+
+    // 자동로그인 token 저장이 잘 되었는지 확인하는 api임.
+    @GetMapping("/profile")
+    public ResponseEntity<String> getProfile(@RequestHeader("Authorization") String token) {
+        try {
+            String loginId = jwtUtil.extractLoginId(token);
+            Member member = loginService.getMemberById(loginId);
+            if (member != null) {
+                return ResponseEntity.ok("User profile: " + member.getNickname());
+            } else {
+                return ResponseEntity.status(404).body("User not found.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid token: " + e.getMessage());
+        }
+    }
+
 }
