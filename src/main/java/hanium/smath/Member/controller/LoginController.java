@@ -1,6 +1,7 @@
 package hanium.smath.Member.controller;
 
 import hanium.smath.Member.dto.AuthResponse;
+import hanium.smath.Member.dto.GoogleLoginRequest;
 import hanium.smath.Member.dto.LoginRequest;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.security.JwtUtil;
@@ -102,17 +103,17 @@ public class LoginController {
     }
 
     @PostMapping("/google-login")
-    public ResponseEntity<String> googleLogin(@RequestBody Map<String, String> request) {
-        String idToken = request.get("idToken");
-
+    public ResponseEntity<String> googleLogin(@RequestBody GoogleLoginRequest request) {
         try {
-            System.out.println("ID Token received: " + idToken);
+            System.out.println("ID Token received: " + request.getIdToken());
 
-            Member member = googleLoginService.processGoogleLogin(idToken);
+            Member member = googleLoginService.processGoogleLogin(request);
 
             if (member != null) {
+                System.out.println("Member found : " + member.getNickname());
                 return ResponseEntity.ok("Login successful! Nickname: " + member.getNickname());
             } else {
+                System.out.println("Failed to process google login request");
                 return ResponseEntity.status(401).body("Login failed for Google ID");
             }
 
