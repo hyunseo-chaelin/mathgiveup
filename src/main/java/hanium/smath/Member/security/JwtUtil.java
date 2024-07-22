@@ -3,6 +3,7 @@ package hanium.smath.Member.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -41,6 +42,18 @@ public class JwtUtil {
                 .parseClaimsJws(token.replace("Bearer ", ""))
                 .getBody()
                 .getSubject();
+    }
+
+    // token 유효성 확인을 위한
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractLoginId(token);
+        System.out.println("Validating token for username: " + username);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    private Boolean isTokenExpired(String token) {
+        final Date expiration = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getExpiration();
+        return expiration.before(new Date());
     }
 
 }
