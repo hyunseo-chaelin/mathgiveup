@@ -2,10 +2,6 @@ package hanium.smath.Member.entity;
 
 import lombok.*;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Date;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,6 +9,8 @@ import java.util.Date;
 @Builder
 
 public class Member {
+    private String idMember;
+
     private String name;
     private String email;
     private String login_id;

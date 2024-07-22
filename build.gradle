@@ -52,7 +52,7 @@ dependencies {
     implementation 'jakarta.mail:jakarta.mail-api:2.0.1' // 최신 버전 사용
     implementation 'com.sun.mail:jakarta.mail:1.6.7' // 최신 버전 사용
 
-    implementation 'com.google.cloud:spring-cloud-gcp-starter-firestore:3.3.0'
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-firestore:3.4.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'io.projectreactor:reactor-core'
@@ -65,6 +65,13 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // if using jackson for JSON processing
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 
 }
 
