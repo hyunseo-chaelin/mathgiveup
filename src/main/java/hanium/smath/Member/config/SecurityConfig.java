@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/members/**").permitAll() // 이메일 인증 및 회원가입 경로 추가).permitAll()
+                        .requestMatchers("/api/community/**").authenticated()
 //                        .requestMatchers("/api/learning/**").authenticated() // 학습 관련 API에 인증 요구
                         .anyRequest().permitAll()
                 )
