@@ -1,32 +1,36 @@
 package hanium.smath.Member.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
-    private final Map<String, String> emailVerificationCodes = new HashMap<>();
+    private final JavaMailSender javaMailSender;
 
-    public String generateVerificationCode() {
-        Random random = new Random();
-        int code = 100000 + random.nextInt(900000); // 6자리 인증 코드 생성
-        return String.valueOf(code);
+    @Autowired
+    public EmailService(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 
-    public void saveVerificationCode(String email, String code) {
-        emailVerificationCodes.put(email, code);
-    }
-
-    public void sendVerificationCode(String email, String code) {
-        // 실제 이메일 전송 로직 구현
-        System.out.println("Sending verification code " + code + " to email " + email);
-    }
-
-    public boolean verifyCode(String email, String code) {
-        String savedCode = emailVerificationCodes.get(email);
-        return savedCode != null && savedCode.equals(code);
+    public void sendEmail(String to, String subject, String text) {
+        System.out.println("EmailService: Preparing to send email to: " + to);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true,"UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(text, true);
+            javaMailSender.send(message);
+            System.out.println("EmailService: Email sent successfully to: " + to);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            System.out.println("EmailService: Failed to send email to: " + to);
+            throw new RuntimeException("Failed to send email", e);
+        }
     }
 }
