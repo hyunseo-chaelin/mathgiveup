@@ -24,15 +24,34 @@ public class PostController {
 
     @GetMapping("/my")
     public CompletableFuture<ResponseEntity<List<PostResponse>>> getMyPosts(Authentication authentication) {
-        String idMember = authentication.getName(); // Firebase 인증된 UID 사용
-        System.out.println("Retrieving posts for idMember: " + idMember);
-        return postService.getPostsByMemberId(idMember)
-                .thenApply(posts -> ResponseEntity.ok(posts))
+        if (authentication == null) {
+            System.out.println("Authentication object is null");
+            return CompletableFuture.completedFuture(ResponseEntity.status(403).build());
+        }
+        String login_id = authentication.getName();
+        System.out.println("Retrieving posts for login_id: " + login_id);
+        return postService.getPostsByLoginId(login_id)
+                .thenApply(posts -> {
+                    System.out.println("Posts retrieved: " + posts.size());
+                    return ResponseEntity.ok(posts);
+                })
                 .exceptionally(ex -> {
                     System.err.println("Error in getMyPosts: " + ex.getMessage());
                     return ResponseEntity.status(500).build();
                 });
     }
+
+//    @GetMapping("/my")
+//    public CompletableFuture<ResponseEntity<List<PostResponse>>> getMyPosts(Authentication authentication) {
+//        String idMember = authentication.getName(); // Firebase 인증된 UID 사용
+//        System.out.println("Retrieving posts for idMember: " + idMember);
+//        return postService.getPostsByMemberId(idMember)
+//                .thenApply(posts -> ResponseEntity.ok(posts))
+//                .exceptionally(ex -> {
+//                    System.err.println("Error in getMyPosts: " + ex.getMessage());
+//                    return ResponseEntity.status(500).build();
+//                });
+//    }
 
     @PostMapping
     public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody Post post) {

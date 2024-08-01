@@ -44,17 +44,17 @@ public class PostRepository {
         });
     }
 
-    public CompletableFuture<List<Post>> getPostsByMemberId(String idMember) {
-        System.out.println("Finding posts for idMember: " + idMember);
+    public CompletableFuture<List<Post>> getPostsByLoginId(DocumentReference login_id) {
+        System.out.println("Finding posts for login_id: " + login_id);
         return CompletableFuture.supplyAsync(() -> {
             try {
-                DocumentReference memberRef = firestore.collection("Members").document(idMember);
+//                DocumentReference memberRef = firestore.collection("Members").document(login_id);
                 ApiFuture<QuerySnapshot> future = firestore.collection(COLLECTION_NAME)
-                        .whereEqualTo("idMember", idMember)
+                        .whereEqualTo("login_id", login_id)
                         .get();
 
                 List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-                System.out.println("Found " + documents.size() + " posts for idMember: " + idMember);
+                System.out.println("Found " + documents.size() + " posts for login_id: " + login_id);
 
                 List<Post> posts = documents.stream()
                         .map(doc -> doc.toObject(Post.class))
@@ -66,7 +66,7 @@ public class PostRepository {
                 throw new RuntimeException(e);
             }
         }).exceptionally(ex -> {
-            System.err.println("Error in getPostsByidMember: " + ex.getMessage());
+            System.err.println("Error in getPostsByLoginId: " + ex.getMessage());
             throw new RuntimeException(ex);
         });
     }

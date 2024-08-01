@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/signup")
+@RequestMapping("/api/members")
 public class SignupController {
     private final SignupService signupService;
 
@@ -51,7 +51,7 @@ public class SignupController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/signup")
     public void registerMember(@RequestBody Member member) {
         System.out.println("Registering member: " + member);
         signupService.registerMember(member);
@@ -69,9 +69,28 @@ public class SignupController {
         }
     }
 
-    @PostMapping("/verifyCode")
-    public boolean verifyEmailCode(@RequestParam String email, @RequestParam String code) throws ExecutionException, InterruptedException {
-        System.out.println("Verifying email code for email: " + email + ", code: " + code);
-        return signupService.verifyEmailCode(email, code);
+
+    @GetMapping("/verifyCode")
+    public ResponseEntity<String> verifyAuthCode(@RequestParam String email, @RequestParam String authCode) {
+        if (email == null || email.isEmpty() || authCode == null || authCode.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email and authentication code are required");
+        }
+
+        try {
+            boolean isValid = signupService.verifyEmailCode(email, authCode); // 인증 코드 검증 로직
+            if (isValid) {
+                return ResponseEntity.ok("Email verified successfully");
+            } else {
+                return ResponseEntity.status(401).body("Invalid or expired authentication code");
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error verifying code");
+        }
     }
+
+//    @PostMapping("/verifyCode")
+//    public boolean verifyEmailCode(@RequestParam String email, @RequestParam String code) throws ExecutionException, InterruptedException {
+//        System.out.println("Verifying email code for email: " + email + ", code: " + code);
+//        return signupService.verifyEmailCode(email, code);
+//    }
 }

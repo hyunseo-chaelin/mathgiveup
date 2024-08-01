@@ -10,7 +10,8 @@ public class PostResponse {
     private String id;
     private String title;
     private String content;
-    private DocumentReference idMember;
+//    private String login_id;
+    private DocumentReference login_id;
     private String createdAt;
     private String updatedAt;
 }

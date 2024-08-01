@@ -21,7 +21,8 @@ public class Post {
 
     @JsonSerialize(using = DocumentReferenceSerializer.class)
     @JsonDeserialize(using = DocumentReferenceDeserializer.class)
-    private DocumentReference idMember;
+    private DocumentReference login_id; // login_id 필드를 DocumentReference로 변경
+//    private String login_id; // login_id 필드를 String으로 변경
     private String createdAt;
     private String updatedAt;
 }
