@@ -1,8 +1,8 @@
 package hanium.smath.Member.config;
 
-import com.google.cloud.firestore.Firestore;
 import hanium.smath.Member.security.JwtRequestFilter;
-import hanium.smath.Member.service.CustomMemberDetailsService;
+//import hanium.smath.Member.service.CustomMemberDetailsService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.filters.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +15,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -29,7 +31,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 public class SecurityConfig {
 
-    private final Firestore firestore;
     private final JwtRequestFilter jwtRequestFilter;
 
 //    public SecurityConfig(Firestore firestore) {
@@ -37,14 +38,11 @@ public class SecurityConfig {
 //        System.out.println("Firestore instance injected: " + firestore);
 //    }
 
-    public SecurityConfig(Firestore firestore, JwtRequestFilter jwtRequestFilter) {
-        this.firestore = firestore;
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
-        System.out.println("Firestore instance injected: " + firestore);
+        System.out.println("JwtRequestFilter instance injected: " + jwtRequestFilter);
     }
 
-//    @Autowired
-//    private JwtRequestFilter jwtRequestFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,13 +52,18 @@ public class SecurityConfig {
                 .cors(withDefaults()) // 추가된 CORS 설정
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/members/**").permitAll()
-                                .requestMatchers("/api/community/**").hasRole("USER")
+//                                .requestMatchers("/api/community/**").hasRole("USER")
 //                        .requestMatchers("/api/community/**").authenticated()
 //                        .requestMatchers("/api/learning/**").authenticated() // 학습 관련 API에 인증 요구
                         .anyRequest().permitAll()
                 )
                         .sessionManagement(sessionManagement -> sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // 세션을 사용하지 않음
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                ); // 세션을 사용하지 않음
 
         // JwtRequestFilter를 UsernamePasswordAuthenticationFilter 전에 추가합니다.
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -98,9 +101,22 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    public CustomMemberDetailsService customMemberDetailsService() {
+//        System.out.println("Creating CustomMemberDetailsService...");
+//        return new CustomMemberDetailsService();
+//    }
+
     @Bean
-    public CustomMemberDetailsService CustomMemberDetailsService() {
-        System.out.println("Creating CustomMemberDetailsService with Firestore: " + firestore);
-        return new CustomMemberDetailsService(firestore);
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Access Denied!");
+        };
+    }
+
+    @Bean
+    public Http403ForbiddenEntryPoint authenticationEntryPoint() {
+        return new Http403ForbiddenEntryPoint();
     }
 }

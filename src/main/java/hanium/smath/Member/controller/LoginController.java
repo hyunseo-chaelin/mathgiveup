@@ -1,13 +1,15 @@
 package hanium.smath.Member.controller;
 
+//import hanium.smath.Member.dto.AuthResponse;
+//import hanium.smath.Member.dto.GoogleLoginRequest;
 import hanium.smath.Member.dto.AuthResponse;
-import hanium.smath.Member.dto.GoogleLoginRequest;
 import hanium.smath.Member.dto.LoginRequest;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.security.JwtUtil;
-import hanium.smath.Member.service.GoogleLoginService;
+//import hanium.smath.Member.service.GoogleLoginService;
 import hanium.smath.Member.service.LoginService;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +22,25 @@ import org.springframework.http.ResponseEntity;
 public class LoginController {
 
     private LoginService loginService;
-    private final GoogleLoginService googleLoginService;
+//    private final GoogleLoginService googleLoginService;
     private final JwtUtil jwtUtil;
 
+//    @Autowired
+//    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil) {
+//        this.loginService = loginService; // controller가 생성될 때 service 주입하기
+//        System.out.println("MemberController instantiated with MemberService");
+//        this.googleLoginService = googleLoginService;
+//        System.out.println("MemberController instantiated with googleLoginService");
+//        this.jwtUtil = jwtUtil;
+//        System.out.println("MemberController instantiated with jwtUtil");
+//    }
+
     @Autowired
-    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil) {
+    public LoginController(LoginService loginService, JwtUtil jwtUtil) {
         this.loginService = loginService; // controller가 생성될 때 service 주입하기
         System.out.println("MemberController instantiated with MemberService");
-        this.googleLoginService = googleLoginService;
-        System.out.println("MemberController instantiated with googleLoginService");
+//        this.googleLoginService = googleLoginService;
+//        System.out.println("MemberController instantiated with googleLoginService");
         this.jwtUtil = jwtUtil;
         System.out.println("MemberController instantiated with jwtUtil");
     }
@@ -37,41 +49,41 @@ public class LoginController {
     public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("RequestBody received: " + loginRequest);
 
-        if(loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
+        if(loginRequest.getLoginId() == null || loginRequest.getLoginId().isEmpty()) {
             System.out.println("Login_id is empty.");
             return ResponseEntity.badRequest().body(new AuthResponse("Login_id is empty.", null, null));
         }
 
-        if(loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
+        if(loginRequest.getLoginPwd() == null || loginRequest.getLoginPwd().isEmpty()) {
             System.out.println("Login_pwd is empty.");
             return ResponseEntity.badRequest().body(new AuthResponse("Login_pwd is empty.", null, null));
         }
 
             try {
-                System.out.println("Login request received for ID: " + loginRequest.getLogin_id());
-                Member infoMember = loginService.getMemberById(loginRequest.getLogin_id());
+                System.out.println("Login request received for ID: " + loginRequest.getLoginId());
+                Member member= loginService.getMemberById(loginRequest.getLoginId());
 
-                if (infoMember != null) {
-                    System.out.println("Member found : " + loginRequest.getLogin_id());
-                    if (infoMember.getLogin_pwd().equals(loginRequest.getLogin_pwd())) {
+                if (member != null) {
+                    System.out.println("Member found : " + loginRequest.getLoginId());
+                    if (member.getLoginPwd().equals(loginRequest.getLoginPwd())) {
                         String token;
                         if (loginRequest.isAutoLogin()) {
-                            System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLogin_id());
-                            token = jwtUtil.generateTokenWithExtendedExpiry(infoMember.getLogin_id());
+                            System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLoginId());
+                            token = jwtUtil.generateTokenWithExtendedExpiry(member.getLoginId());
                         } else {
-                            System.out.println("Generating token for ID: " + loginRequest.getLogin_id());
-                            token = jwtUtil.generateToken(infoMember.getLogin_id());
+                            System.out.println("Generating token for ID: " + loginRequest.getLoginId());
+                            token = jwtUtil.generateToken(member.getLoginId());
                         }
-                        AuthResponse response = new AuthResponse("Login successful", infoMember.getNickname(), token);
+                        AuthResponse response = new AuthResponse("Login successful", member.getNickname(), token);
 
-                        System.out.println("Login successful for ID: " + loginRequest.getLogin_id());
+                        System.out.println("Login successful for ID: " + loginRequest.getLoginId());
                         return ResponseEntity.ok(response);
                     } else {
-                        System.out.println("Invalid login_pwd for ID: " + loginRequest.getLogin_id());
+                        System.out.println("Invalid login_pwd for ID: " + loginRequest.getLoginId());
                         return ResponseEntity.status(401).body(new AuthResponse("Invalid login_pwd.", null, null));
                     }
                 } else {
-                    System.out.println("Invalid login_id: " + loginRequest.getLogin_id());
+                    System.out.println("Invalid login_id: " + loginRequest.getLoginId());
                     return ResponseEntity.status(401).body(new AuthResponse("Invalid login_id.", null, null));
                 }
             } catch (Exception e) {
@@ -102,57 +114,57 @@ public class LoginController {
 //        }
     }
 
-    @PostMapping("/google-login")
-    public ResponseEntity<String> googleLogin(@RequestBody GoogleLoginRequest request) {
-        try {
-            System.out.println("ID Token received: " + request.getIdToken());
-
-            Member member = googleLoginService.processGoogleLogin(request);
-
-            if (member != null) {
-                System.out.println("Member found : " + member.getNickname());
-                return ResponseEntity.ok("Login successful! Nickname: " + member.getNickname());
-            } else {
-                System.out.println("Failed to process google login request");
-                return ResponseEntity.status(401).body("Login failed for Google ID");
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/google-login")
+//    public ResponseEntity<String> googleLogin(@RequestBody GoogleLoginRequest request) {
+//        try {
+//            System.out.println("ID Token received: " + request.getIdToken());
+//
+//            Member member = googleLoginService.processGoogleLogin(request);
+//
+//            if (member != null) {
+//                System.out.println("Member found : " + member.getNickname());
+//                return ResponseEntity.ok("Login successful! Nickname: " + member.getNickname());
+//            } else {
+//                System.out.println("Failed to process google login request");
+//                return ResponseEntity.status(401).body("Login failed for Google ID");
+//            }
+//
+//        } catch (Exception e) {
+//            System.err.println("Error during login: " + e.getMessage());
+//            return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
+//        }
+//    }
 
     @GetMapping("/find/loginId")
-    public ResponseEntity<String> findLoginId(@RequestParam String email, String birthDate) {
+    public ResponseEntity<String> findLoginId(@RequestParam String email, LocalDate birthDate) {
         System.out.println("Received request to find login ID");
 
         try {
             String login_id = loginService.findLoginId(email,birthDate);
             System.out.println("Found ID: " + login_id);
             return ResponseEntity.ok("Found ID! ID: " + login_id);
-        } catch (RuntimeException | ExecutionException | InterruptedException e) {
+        } catch (RuntimeException e) {
             System.err.println("Error finding login ID: " + e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/reset/password")
-    public ResponseEntity resetPassword(@RequestParam String login_id) {
-        try {
-            boolean userExists = loginService.checkUserExists(login_id);
-            if (userExists) {
-                System.out.println("Find");
-                return ResponseEntity.ok("User exists. Proceed to send reset email.");
-            } else {
-                System.out.println("No Found");
-                return ResponseEntity.status(302).header("Location", "/api/members/find/loginId").build();
-            }
-        } catch (ExecutionException | InterruptedException e) {
-            System.err.println("Error resetting password: " + e.getMessage());
-            return ResponseEntity.status(500).body("Error occurred while checking user existence: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/reset/password")
+//    public ResponseEntity resetPassword(@RequestParam String login_id) {
+//        try {
+//            boolean userExists = loginService.checkUserExists(login_id);
+//            if (userExists) {
+//                System.out.println("Find");
+//                return ResponseEntity.ok("User exists. Proceed to send reset email.");
+//            } else {
+//                System.out.println("No Found");
+//                return ResponseEntity.status(302).header("Location", "/api/members/find/loginId").build();
+//            }
+//        } catch (ExecutionException | InterruptedException e) {
+//            System.err.println("Error resetting password: " + e.getMessage());
+//            return ResponseEntity.status(500).body("Error occurred while checking user existence: " + e.getMessage());
+//        }
+//    }
 
     // 자동로그인 token 저장이 잘 되었는지 확인하는 api임.
     @GetMapping("/profile")
