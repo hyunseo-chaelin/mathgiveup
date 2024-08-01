@@ -7,15 +7,15 @@ import lombok.Setter;
 @Setter
 
 public class LoginRequest {
-    private String login_id;
-    private String login_pwd;
+    private String loginId;
+    private String loginPwd;
     private boolean autoLogin;
 
     public LoginRequest() {}
 
-    public LoginRequest(String login_id, String login_pwd, boolean autoLogin) {
-        this.login_id = login_id;
-        this.login_pwd = login_pwd;
+    public LoginRequest(String loginId, String loginPwd, boolean autoLogin) {
+        this.loginId = loginId;
+        this.loginPwd = loginPwd;
         this.autoLogin = autoLogin;
     }
 
