@@ -44,10 +44,20 @@ public class SignupService {
     public void registerMember(Member member) {
         System.out.println("SignupService: Registering member: " + member);
         CollectionReference members = firestore.collection("Members");
-        DocumentReference docRef = members.document();
-        docRef.set(member);
-        System.out.println("SignupService: Member registered: " + member);
+        // login_id를 문서 이름으로 사용하여 Firestore에 저장
+        DocumentReference docRef = members.document(member.getLogin_id());
+        try {
+            docRef.set(member).get();
+            System.out.println("SignupService: Member registered: " + member);
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error registering member: " + e.getMessage());
+            throw new RuntimeException("회원가입 중 오류가 발생했습니다.", e);
+        }
     }
+//        DocumentReference docRef = members.document();
+//        docRef.set(member);
+//        System.out.println("SignupService: Member registered: " + member);
+//    }
 
     private String generateVerificationCode() {
         Random random = new Random();
