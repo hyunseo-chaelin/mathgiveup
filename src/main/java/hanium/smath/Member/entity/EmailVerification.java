@@ -22,4 +22,17 @@ public class EmailVerification {
     private int verificationCode;
     private boolean verifiedEmail;
     private LocalDateTime createTime;
+
+    // 기본 생성자
+    public EmailVerification() {
+        this.verifiedEmail = false; // 새 인증 항목에 대한 기본값
+        this.createTime = LocalDateTime.now(); // 생성 시간을 현재 시간으로 설정
+    }
+
+    // 편의를 위한 파라미터 생성자
+    public EmailVerification(Member member, int verificationCode) {
+        this();
+        this.member = member;
+        this.verificationCode = verificationCode;
+    }
 }
