@@ -18,13 +18,13 @@ import java.time.LocalDate;
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idMember")
+    @Column(name = "id_Member")
     private Long idMember;
 
-    @Column(name = "loginId", length = 30, nullable = false, unique = true)
+    @Column(name = "login_id", length = 30, nullable = true, unique = true)
     private String loginId;
 
-    @Column(name = "loginPwd", length = 30, nullable = false)
+    @Column(name = "login_pwd", length = 30, nullable = true)
     private String loginPwd;
 
     @Column(name = "name", length = 30, nullable = false)
@@ -36,7 +36,7 @@ public class Member {
     @Column(name = "grade", length = 10, nullable = false)
     private int grade;
 
-    @Column(name = "idLevel", nullable = false)
+    @Column(name = "id_level", nullable = false)
     private int idLevel;
 
     @Column(name = "birthdate", nullable = false)
@@ -45,21 +45,24 @@ public class Member {
     @Column(name = "email", length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "isEmailVerified", nullable = false)
+    @Column(name = "is_email_verified", nullable = false)
     private boolean isEmailVerified;
 
     @CreationTimestamp
-    @Column(name = "createTime", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "create_time", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createTime;
 
-    @Column(name = "iconPath", length = 255, nullable = false)
+    @Column(name = "icon_path", length = 255, nullable = true)
     private String iconPath;
 
-    @Column(name = "phoneNum", length = 30, nullable = false)
+    @Column(name = "phone_num", length = 30, nullable = false)
     private String phoneNum;
 
-    @Column(name = "isAdmin", nullable = false)
+    @Column(name = "is_admin", nullable = false)
     private boolean isAdmin;
+
+    @Column(name = "google_id", nullable = true, unique = true)
+    private String googleId; // 구글 아이디 추가
 }
 
 //@Getter

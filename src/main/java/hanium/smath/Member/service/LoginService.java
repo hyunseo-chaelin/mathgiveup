@@ -3,6 +3,12 @@ import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.LoginRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.*;
 import java.time.LocalDate;
 
@@ -12,11 +18,14 @@ public class LoginService {
     private final LoginRepository loginRepository;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     public LoginService(LoginRepository loginRepository) {
         this.loginRepository = loginRepository;
     }
 
-
+    // 로그인 ID를 통해 사용자를 조회
     public Member getMemberById(String loginId) {
         System.out.println("Fetching member by loginId: " + loginId);
         return loginRepository.findByLoginId(loginId)
@@ -24,24 +33,12 @@ public class LoginService {
     }
 
 
-//    public Member findByGoogleId(String googleId) throws ExecutionException, InterruptedException, TimeoutException {
-//        try {
-//            Query query = firestore.collection("Members").whereEqualTo("googleId", googleId);
-//            ApiFuture<QuerySnapshot> querySnapshot = query.get();
-//
-//            List<QueryDocumentSnapshot> documents = querySnapshot.get(100, TimeUnit.SECONDS).getDocuments();
-//
-//            if (!documents.isEmpty()) {
-//                return documents.get(0).toObject(Member.class);
-//            } else {
-//                return null;
-//            }
-//        } catch (Exception ex) {
-//            System.err.println("Error retrieving member by Google ID: " + ex.getMessage());
-//            ex.printStackTrace();
-//            throw ex;
-//        }
-//    }
+    public Member findByGoogleId(String googleId) throws ExecutionException, InterruptedException, TimeoutException {
+        // 이 부분은 Firebase에서 MySQL로 변경 필요
+        System.out.println("Fetching member by googleId: " + googleId);
+        return loginRepository.findByGoogleId(googleId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid google_id: " + googleId));
+    }
 
     public void save(Member member) {
         System.out.println("Saving member with loginId: " + member.getLoginId());
@@ -55,8 +52,19 @@ public class LoginService {
                 .getLoginId();
     }
 
+    // 사용자가 존재하는지 확인
     public boolean checkUserExists(String loginId) {
-        System.out.println("Checking if user exists with loginId: " + loginId);
         return loginRepository.findByLoginId(loginId).isPresent();
+    }
+
+    // 사용자의 비밀번호를 변경
+    public boolean changeUserPassword(String loginId, String newPassword) {
+        return loginRepository.findByLoginId(loginId)
+                .map(member -> {
+                    member.setLoginPwd(newPassword);
+                    loginRepository.save(member);
+                    return true;
+                })
+                .orElse(false);
     }
 }
