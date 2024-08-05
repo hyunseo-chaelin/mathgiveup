@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface LoginRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmailAndBirthdate(String email, LocalDate birthdate);
     Optional<Member> findByLoginId(String loginId);
-//    Optional<Member> findByGoogleId(String googleId);
+    Optional<Member> findByGoogleId(String googleId);
 }
