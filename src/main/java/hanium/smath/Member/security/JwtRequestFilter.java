@@ -86,21 +86,3 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 }
 
-//                UserDetails userDetails = this.userDetailsService.loadUserByUsername(login_id);
-//                System.out.println("Loaded UserDetails for loginId: " + login_id);
-//
-//                if (jwtUtil.validateToken(jwt, userDetails)) {
-//
-//                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-//                            userDetails, null, userDetails.getAuthorities());
-//                    usernamePasswordAuthenticationToken
-//                            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-//                    System.out.println("User authenticated and security context set");
-//                } else {
-//                    System.out.println("Invalid JWT");
-//                }
-//            }
-//        filterChain.doFilter(request, response);
-//        }
-//    }

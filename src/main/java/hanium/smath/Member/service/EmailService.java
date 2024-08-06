@@ -18,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -58,10 +59,21 @@ public class EmailService {
         return 1000 + random.nextInt(9000); // 4자리 랜덤 숫자 생성
     }
 
+    // 이전 인증코드 무효화
+    private void invalidateOldVerificationCodes(String loginId) {
+        System.out.println("EmailService: Invalidating old verification codes for loginId: " + loginId);
+        emailVerificationRepository.findByMember_LoginIdAndVerifiedEmailFalse(loginId)
+                .ifPresent(emailVerification -> {
+                    emailVerification.setVerifiedEmail(true);
+                    emailVerificationRepository.save(emailVerification);
+                    System.out.println("EmailService: Old verification code invalidated for loginId: " + loginId);
+                });
+    }
 
     // 인증 코드를 생성하여 지정된 이메일로 전송하고, 데이터베이스에 저장
     public void sendVerificationCode(String loginId, String email) {
         System.out.println("EmailService: Sending verification code to email: " + email);
+        invalidateOldVerificationCodes(loginId); // 이전 인증 코드 무효화
         int code = generateVerificationCode();
         sendEmail(email, "Verification Code", "Your verification code is: " + code);
         saveVerificationCode(loginId, code);
@@ -85,37 +97,31 @@ public class EmailService {
     //사용자가 입력한 인증 코드가 유효한지 검증
     public boolean verifyEmailCode(String loginId, int code) {
         System.out.println("EmailService: Verifying email code for loginId: " + loginId + ", code: " + code);
-        return emailVerificationRepository.findByMember_LoginIdAndVerifiedEmailFalse(loginId)
-                .map(emailVerification -> {
-                    System.out.println("EmailService: Found verification code for loginId: " + loginId + ", storedCode: " + emailVerification.getVerificationCode());
-                    boolean verified = code == emailVerification.getVerificationCode();
-                    if (verified) {
-                        emailVerification.setVerifiedEmail(true);
-                        emailVerificationRepository.save(emailVerification);
-                        System.out.println("EmailService: Email code verified and marked as used for loginId: " + loginId);
-                    } else {
-                        System.out.println("EmailService: Provided code does not match stored code for loginId: " + loginId);
-                    }
-                    System.out.println("EmailService: Email code verification result: " + verified);
-                    return verified;
-                })
-                .orElseGet(() -> {
-                    System.out.println("EmailService: No verification code found for loginId: " + loginId + " or email already verified.");
-                    return false;
-                });
+        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_LoginIdAndVerifiedEmailFalseOrderByCreateTimeDesc(loginId);
+
+        if (optionalEmailVerification.isPresent()) {
+            EmailVerification emailVerification = optionalEmailVerification.get();
+            System.out.println("EmailService: Found verification code for loginId: " + loginId + ", storedCode: " + emailVerification.getVerificationCode());
+            boolean verified = code == emailVerification.getVerificationCode();
+            System.out.println("EmailService: Email code verification result for loginId: " + loginId + " is " + verified);
+            return verified;
+        } else {
+            System.out.println("EmailService: No verification code found for loginId: " + loginId + " or email already verified.");
+            return false;
+        }
     }
 
-//    private void markEmailAsVerified(String loginId) {
-//        String query = "UPDATE EmailVerification SET verifiedEmail = 1 WHERE login_id = ?";
-//        try (Connection connection = dataSource.getConnection();
-//             PreparedStatement statement = connection.prepareStatement(query)) {
-//            statement.setString(1, loginId);
-//            statement.executeUpdate();
-//            System.out.println("EmailService: Email marked as verified for loginId: " + loginId);
-//        } catch (SQLException e) {
-//            System.err.println("Error marking email as verified: " + e.getMessage());
-//            throw new RuntimeException("Failed to mark email as verified", e);
-//        }
-//    }
+    public void invalidateVerificationCode(String loginId, int code) {
+        System.out.println("EmailService: Invalidating verification code for loginId: " + loginId + ", code: " + code);
+        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_LoginIdAndVerifiedEmailFalseOrderByCreateTimeDesc(loginId);
 
+        if (optionalEmailVerification.isPresent()) {
+            EmailVerification emailVerification = optionalEmailVerification.get();
+            if (code == emailVerification.getVerificationCode()) {
+                emailVerification.setVerifiedEmail(true);
+                emailVerificationRepository.save(emailVerification);
+                System.out.println("EmailService: Verification code invalidated for loginId: " + loginId + ", code: " + code);
+            }
+        }
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,11 +34,6 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
-//    public SecurityConfig(Firestore firestore) {
-//        this.firestore = firestore;
-//        System.out.println("Firestore instance injected: " + firestore);
-//    }
-
     public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
         System.out.println("JwtRequestFilter instance injected: " + jwtRequestFilter);
@@ -52,33 +48,24 @@ public class SecurityConfig {
                 .cors(withDefaults()) // 추가된 CORS 설정
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/members/**").permitAll()
-//                                .requestMatchers("/api/community/**").hasRole("USER")
-//                        .requestMatchers("/api/community/**").authenticated()
 //                        .requestMatchers("/api/learning/**").authenticated() // 학습 관련 API에 인증 요구
+//                        .requestMatchers("/api/achievements/**").authenticated()
                         .anyRequest().permitAll()
                 )
-                        .sessionManagement(sessionManagement -> sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                         .accessDeniedHandler(accessDeniedHandler())
-                ); // 세션을 사용하지 않음
+                )
+
+                        .sessionManagement(sessionManagement -> sessionManagement
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // JwtRequestFilter를 UsernamePasswordAuthenticationFilter 전에 추가합니다.
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-//        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .permitAll()
-//                );
 
         System.out.println("SecurityFilterChain configured.");
-        // JwtRequestFilter를 UsernamePasswordAuthenticationFilter 전에 추가합니다.
         return http.build();
     }
 
@@ -101,11 +88,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public CustomMemberDetailsService customMemberDetailsService() {
-//        System.out.println("Creating CustomMemberDetailsService...");
-//        return new CustomMemberDetailsService();
-//    }
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {

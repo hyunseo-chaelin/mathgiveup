@@ -10,10 +10,7 @@ import hanium.smath.Member.service.EmailService;
 import hanium.smath.Member.service.GoogleLoginService;
 import hanium.smath.Member.service.LoginService;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -44,41 +41,41 @@ public class LoginController {
     public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("RequestBody received: " + loginRequest);
 
-        if(loginRequest.getLoginId() == null || loginRequest.getLoginId().isEmpty()) {
+        if(loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
             System.out.println("Login_id is empty.");
             return ResponseEntity.badRequest().body(new AuthResponse("Login_id is empty.", null, null));
         }
 
-        if(loginRequest.getLoginPwd() == null || loginRequest.getLoginPwd().isEmpty()) {
+        if(loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
             System.out.println("Login_pwd is empty.");
             return ResponseEntity.badRequest().body(new AuthResponse("Login_pwd is empty.", null, null));
         }
 
             try {
-                System.out.println("Login request received for ID: " + loginRequest.getLoginId());
-                Member member= loginService.getMemberById(loginRequest.getLoginId());
+                System.out.println("Login request received for ID: " + loginRequest.getLogin_id());
+                Member member= loginService.getMemberById(loginRequest.getLogin_id());
 
                 if (member != null) {
-                    System.out.println("Member found : " + loginRequest.getLoginId());
-                    if (member.getLoginPwd().equals(loginRequest.getLoginPwd())) {
+                    System.out.println("Member found : " + loginRequest.getLogin_id());
+                    if (member.getLoginPwd().equals(loginRequest.getLogin_pwd())) {
                         String token;
                         if (loginRequest.isAutoLogin()) {
-                            System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLoginId());
+                            System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLogin_id());
                             token = jwtUtil.generateTokenWithExtendedExpiry(member.getLoginId());
                         } else {
-                            System.out.println("Generating token for ID: " + loginRequest.getLoginId());
+                            System.out.println("Generating token for ID: " + loginRequest.getLogin_id());
                             token = jwtUtil.generateToken(member.getLoginId());
                         }
                         AuthResponse response = new AuthResponse("Login successful", member.getNickname(), token);
 
-                        System.out.println("Login successful for ID: " + loginRequest.getLoginId());
+                        System.out.println("Login successful for ID: " + loginRequest.getLogin_id());
                         return ResponseEntity.ok(response);
                     } else {
-                        System.out.println("Invalid login_pwd for ID: " + loginRequest.getLoginId());
+                        System.out.println("Invalid login_pwd for ID: " + loginRequest.getLogin_id());
                         return ResponseEntity.status(401).body(new AuthResponse("Invalid login_pwd.", null, null));
                     }
                 } else {
-                    System.out.println("Invalid login_id: " + loginRequest.getLoginId());
+                    System.out.println("Invalid login_id: " + loginRequest.getLogin_id());
                     return ResponseEntity.status(401).body(new AuthResponse("Invalid login_id.", null, null));
                 }
             } catch (Exception e) {
@@ -176,18 +173,23 @@ public class LoginController {
     @PatchMapping("/reset/password/change")
     public ResponseEntity changePassword(@RequestParam String login_id, @RequestParam String new_password, @RequestParam int code) {
         System.out.println("LoginController: Changing password for loginId: " + login_id + ", code: " + code);
+        // 인증 코드 검증
         boolean codeValid = emailService.verifyEmailCode(login_id, code);
-        if (codeValid) {
-            boolean passwordChanged = loginService.changeUserPassword(login_id, new_password);
-            if (passwordChanged) {
-                return ResponseEntity.ok("Password changed successfully.");
-            } else {
-                System.out.println("LoginController: Failed to change password for loginId: " + login_id);
-                return ResponseEntity.status(400).body("Failed to change password.");
-            }
-        } else {
+        if (!codeValid) {
             System.out.println("LoginController: Invalid verification code for loginId: " + login_id);
             return ResponseEntity.status(400).body("Invalid verification code.");
+        }
+
+        // 비밀번호 변경
+        boolean passwordChanged = loginService.changeUserPassword(login_id, new_password);
+        if (passwordChanged) {
+            // 인증 코드 무효화
+            emailService.invalidateVerificationCode(login_id, code);
+            System.out.println("LoginController: Password changed successfully for loginId: " + login_id);
+            return ResponseEntity.ok("Password changed successfully.");
+        } else {
+            System.out.println("LoginController: Failed to change password for loginId: " + login_id);
+            return ResponseEntity.status(400).body("Failed to change password.");
         }
     }
 

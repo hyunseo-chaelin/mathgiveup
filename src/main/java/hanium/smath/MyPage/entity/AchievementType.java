@@ -4,7 +4,6 @@ import hanium.smath.Member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,17 +13,19 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "learning_record")
-public class LearningRecord {
+@Table(name = "achievementtype")
+public class AchievementType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idRecord;
-
-    @ManyToOne
-    @JoinColumn(name = "login_id", referencedColumnName = "login_id", nullable = false)
-    private Member member;
+    private int idAchievementType;
 
     @Column(nullable = false)
-    private LocalDate learningDate;
+    private String name;
+
+    @Column
+    private String description;
+
+    @OneToMany(mappedBy = "achievementType")
+    private List<Achievement> achievements;
 }
