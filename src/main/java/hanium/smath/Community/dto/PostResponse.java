@@ -1,17 +1,16 @@
-//package hanium.smath.Community.dto;
-//
-//import com.google.cloud.firestore.DocumentReference;
-//import lombok.Builder;
-//import lombok.Getter;
-//
-//@Getter
-//@Builder
-//public class PostResponse {
-//    private String id;
-//    private String title;
-//    private String content;
-////    private String login_id;
-//    private DocumentReference login_id;
-//    private String createdAt;
-//    private String updatedAt;
-//}
+package hanium.smath.Community.dto;
+
+import hanium.smath.Community.entity.PostType;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class PostResponse {
+    private Long id;
+    private String title;
+    private String content;
+    private PostType postType;
+    private String createdTime;
+    private String updatedTime;
+}

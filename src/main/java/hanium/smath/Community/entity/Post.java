@@ -1,28 +1,51 @@
-//package hanium.smath.Community.entity;
-//
-//import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-//import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-//import com.google.cloud.firestore.DocumentReference;
-//import hanium.smath.Community.util.DocumentReferenceDeserializer;
-//import hanium.smath.Community.util.DocumentReferenceSerializer;
-//import lombok.*;
-//import java.time.format.DateTimeFormatter;
-//
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
-//
-//public class Post {
-//    private String id;
-//    private String title;
-//    private String content;
-//
-//    @JsonSerialize(using = DocumentReferenceSerializer.class)
-//    @JsonDeserialize(using = DocumentReferenceDeserializer.class)
-//    private DocumentReference login_id; // login_id 필드를 DocumentReference로 변경
-////    private String login_id; // login_id 필드를 String으로 변경
-//    private String createdAt;
-//    private String updatedAt;
-//}
+package hanium.smath.Community.entity;
+
+import hanium.smath.Member.entity.Member;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "post")
+public class Post {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idPost;
+
+    @ManyToOne
+    @JoinColumn(name = "login_id", referencedColumnName = "login_id", nullable = false)
+    private Member member;
+
+    @Column(name = "title", length = 50, nullable = false)
+    private String title;
+
+    @Column(name = "content", length = 1000, nullable = false)
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "post_type", nullable = false)
+    private PostType postType;
+
+    private LocalDateTime createdTime;
+    private LocalDateTime updatedTime;
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdTime = now;
+        updatedTime = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedTime = LocalDateTime.now();
+    }
+}
