@@ -26,22 +26,44 @@ public class SignupService {
         return signupRepository.existsByLoginId(loginId);
     }
 
-    public void registerMember(String email, String name, String loginId, String loginPwd, String nickname, int grade, LocalDate birthdate, String phoneNum) {
-        Member member = Member.builder()
-                .email(email)
-                .name(name)
-                .loginId(loginId)
-                .loginPwd(loginPwd)
-                .nickname(nickname)
-                .grade(grade)
-                .birthdate(birthdate)
-                .phoneNum(phoneNum)
-                .idLevel(1) // 기본 레벨
-                .isEmailVerified(false) // 기본적으로 이메일 인증되지 않은 상태
-                .createTime(new Timestamp(System.currentTimeMillis()))
-                .isAdmin(false) // 기본적으로 관리자가 아닌 상태
-                .build();
+    public void saveEmail(String email) {
+        if (!signupRepository.existsByEmail(email)) {
+            Member member = Member.builder()
+                    .email(email)
+                    .isEmailVerified(false)
+                    .createTime(new Timestamp(System.currentTimeMillis()))
+                    .idLevel(1)
+                    .isAdmin(false)
+                    .name("Default Name") // 기본값 설정
+                    .build();
+            signupRepository.save(member);
+        }
+    }
 
+    public void markEmailAsVerified(String email) {
+        Member member = signupRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email not found: " + email));
+        member.setEmailVerified(true);
+        signupRepository.save(member);
+    }
+
+    public boolean isEmailVerified(String email) {
+        return signupRepository.findByEmail(email)
+                .map(Member::isEmailVerified)
+                .orElse(false);
+    }
+
+    public void registerMember(String email, String name, String loginId, String loginPwd, String nickname, int grade, LocalDate birthdate, String phoneNum) {
+        Member member = signupRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email not found: " + email));
+
+        member.setName(name);
+        member.setLoginId(loginId);
+        member.setLoginPwd(loginPwd);
+        member.setNickname(nickname);
+        member.setGrade(grade);
+        member.setBirthdate(birthdate);
+        member.setPhoneNum(phoneNum);
         signupRepository.save(member);
     }
 }
