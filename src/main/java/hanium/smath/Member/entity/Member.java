@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-//import javax.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 
@@ -27,14 +26,14 @@ public class Member {
     @Column(name = "login_pwd", length = 30, nullable = true)
     private String loginPwd;
 
-    @Column(name = "name", length = 30, nullable = false)
+    @Column(name = "name", length = 30, nullable = true)
     private String name;
 
-    @Column(name = "nickname", length = 30, nullable = false, unique = true)
+    @Column(name = "nickname", length = 30, nullable = true, unique = true)
     private String nickname;
 
-    @Column(name = "grade", length = 10, nullable = false)
-    private int grade;
+    @Column(name = "grade", length = 10, nullable = true)
+    private Integer grade;
 
     @Column(name = "id_level", nullable = false)
     private int idLevel;
@@ -52,10 +51,7 @@ public class Member {
     @Column(name = "create_time", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createTime;
 
-    @Column(name = "icon_path", length = 255, nullable = true)
-    private String iconPath;
-
-    @Column(name = "phone_num", length = 30, nullable = false)
+    @Column(name = "phone_num", length = 30, nullable = true)
     private String phoneNum;
 
     @Column(name = "is_admin", nullable = false)
@@ -64,4 +60,3 @@ public class Member {
     @Column(name = "google_id", nullable = true, unique = true)
     private String googleId; // 구글 아이디 추가
 }
-
