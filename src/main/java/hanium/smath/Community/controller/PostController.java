@@ -35,6 +35,7 @@ public class PostController {
         }
         String loginId = authentication.getName();
         System.out.println("Retrieving posts for loginId: " + loginId);
+
         return postService.getPostsByLoginId(loginId)
                 .thenApply(posts -> {
                     System.out.println("Posts retrieved: " + posts.size());

@@ -37,6 +37,7 @@ public class LoginController {
         System.out.println("MemberController instantiated with email");
     }
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("RequestBody received: " + loginRequest);
@@ -82,28 +83,6 @@ public class LoginController {
                 System.err.println("Error during login: " + e.getMessage());
                 return ResponseEntity.status(500).body(new AuthResponse("Error during login: " + e.getMessage(), null, null));
             }
-
-//            if(infoMember != null) {
-//                if (infoMember.getLogin_pwd().equals(member.getLogin_pwd())) {
-//                    System.out.println("Login successful for ID: " + member.getLogin_id());
-//                    return ResponseEntity.ok("Login successful ! Nickname : " + infoMember.getNickname());
-//                } else {
-//                    System.out.println("Login failed for Password: " + member.getLogin_id());
-//                    return ResponseEntity.ok("Invalid password");
-//                }
-//            } else {
-//                System.out.println("Login failed for ID: " + member.getLogin_id());
-//                return ResponseEntity.status(401).body("Login faild for ID");
-//            }
-//        } catch (ExecutionException | InterruptedException e) { // 비동기 및 스레드 오류
-//            System.err.println("Error during login: " + e.getMessage());
-//            return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
-//        } catch (IllegalArgumentException e) { // 메서드가 잘못된 인수로 인한 오류
-//            System.err.println("Error: " + e.getMessage());
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        } catch (TimeoutException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     @PostMapping("/google-login")
@@ -127,10 +106,10 @@ public class LoginController {
         }
     }
 
+    // 아이디 찾기
     @GetMapping("/find/loginId")
     public ResponseEntity<String> findLoginId(@RequestParam String email, @RequestParam String birthdate) {
         System.out.println("Received request to find login ID");
-
         try {
             LocalDate birthDateLocal = LocalDate.parse(birthdate);
             String loginId = loginService.findLoginId(email, birthDateLocal);
@@ -142,26 +121,56 @@ public class LoginController {
         }
     }
 
-    // 멤버가 있으면 이메일 보내기
-    @PatchMapping("/reset/password/initiate")
-    public ResponseEntity initiatePasswordReset(@RequestParam String login_id) {
+    // 비밀번호 재설정 부분
+    // 비번 재설정 - 아이디 찾기를 통해 회원의 존재 여부
+    @PostMapping("/reset/password/loginId")
+    public ResponseEntity<String> initiatePasswordReset(@RequestParam String login_id) {
         System.out.println("LoginController: Initiating password reset for loginId: " + login_id);
-        Member member = loginService.getMemberById(login_id);
-        if (member != null) {
-            emailService.sendVerificationCode(member.getLoginId(), member.getEmail());
-            return ResponseEntity.ok("Verification email sent.");
-        } else {
-            System.out.println("LoginController: User not found for loginId: " + login_id);
-            return ResponseEntity.status(404).body("User not found.");
+        try {
+            Member member = loginService.getMemberById(login_id);
+            if (member != null) {
+                // 회원이 존재하면 이메일을 보낼지 여부를 사용자에게 확인하는 메시지 제공
+                System.out.println("LoginController: Member found. Asking for email confirmation.");
+                return ResponseEntity.ok("Account exists. Would you like to send a verification code to the registered email?");
+            } else {
+                System.out.println("LoginController: User not found for loginId: " + login_id);
+                return ResponseEntity.status(404).body("User not found.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error during password reset initiation: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error during password reset initiation.");
         }
     }
 
-    // 입력한 인증 코드를 검증
+    // 로그인 ID로 인증 코드 전송 (재전송도 이 API 사용)
+    @PostMapping("/reset/password/send-code")
+    public ResponseEntity<String> sendVerificationCode(@RequestParam String login_id) {
+        System.out.println("LoginController: Initiating password reset for loginId: " + login_id);
+        try {
+            // 해당 login_id를 가진 사용자가 있는지 확인
+            Member member = loginService.getMemberById(login_id);
+            if (member != null) {
+                // 기존 코드 무효화 및 새로운 인증 코드 생성 및 이메일 전송
+                emailService.sendVerificationCode(login_id, member.getEmail());
+                System.out.println("LoginController: Verification code sent to email: " + member.getEmail());
+                return ResponseEntity.ok("Verification code sent.");
+            } else {
+                System.out.println("LoginController: User not found for loginId: " + login_id);
+                return ResponseEntity.status(404).body("User not found.");
+            }
+        } catch (RuntimeException e) {
+            System.err.println("Error during verification code sending: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error during verification code sending: " + e.getMessage());
+        }
+    }
+
+    // 이메일 보낸 코드 검증
     @PatchMapping("/reset/password/verify")
-    public ResponseEntity verifyCode(@RequestParam String login_id, @RequestParam int code) {
+    public ResponseEntity<String> verifyCode(@RequestParam String login_id, @RequestParam int code) {
         System.out.println("LoginController: Verifying code for loginId: " + login_id + ", code: " + code);
         boolean codeValid = emailService.verifyEmailCode(login_id, code);
         if (codeValid) {
+            // 상태 업데이트가 필요한 경우
             return ResponseEntity.ok("Verification code valid.");
         } else {
             System.out.println("LoginController: Invalid verification code for loginId: " + login_id);
@@ -169,6 +178,7 @@ public class LoginController {
         }
     }
 
+    // 클라이언트 측(UI)에서 먼저 두 개의 비밀번호가 일치하는지를 확인한 후 서버로 요청을 보내는 것이 일반적
     // 인증 코드를 검증한 후 비밀번호를 변경
     @PatchMapping("/reset/password/change")
     public ResponseEntity changePassword(@RequestParam String login_id, @RequestParam String new_password, @RequestParam int code) {
@@ -190,25 +200,6 @@ public class LoginController {
         } else {
             System.out.println("LoginController: Failed to change password for loginId: " + login_id);
             return ResponseEntity.status(400).body("Failed to change password.");
-        }
-    }
-
-    // 프로필 정보를 조회
-    @GetMapping("/profile")
-    public ResponseEntity<String> getProfile(@RequestHeader("Authorization") String token) {
-        try {
-            String loginId = jwtUtil.extractLoginId(token);
-            System.out.println("LoginController: Fetching profile for loginId: " + loginId);
-            Member member = loginService.getMemberById(loginId);
-            if (member != null) {
-                return ResponseEntity.ok("User profile: " + member.getNickname());
-            } else {
-                System.out.println("LoginController: User not found for loginId: " + loginId);
-                return ResponseEntity.status(404).body("User not found.");
-            }
-        } catch (Exception e) {
-            System.out.println("LoginController: Invalid token: " + e.getMessage());
-            return ResponseEntity.status(401).body("Invalid token: " + e.getMessage());
         }
     }
 }

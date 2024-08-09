@@ -1,39 +1,40 @@
 package hanium.smath.Member.config;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
+
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.servers.Server;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@OpenAPIDefinition(
+        info = @Info(title = "SMath", version = "v1"),
+        servers = @Server(url = "/", description = "서버 URL"),
+        security = @SecurityRequirement(name = "bearerAuth") // 여기에 보안 요구 사항 추가
+)
+
+@SecurityScheme(
+        name = "bearerAuth", // 보안 스키마 이름 설정
+        type = SecuritySchemeType.HTTP, // HTTP 스키마 유형 설정
+        scheme = "bearer", // 인증 방식 설정
+        bearerFormat = "JWT" // 베어러 형식 설정 (선택 사항)
+)
+
+@RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI openAPI() {
-        String jwt = "JWT";
-
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwt);
-
-        Components components = new Components()
-                .addSecuritySchemes(jwt, new SecurityScheme()
-                        .name(jwt)
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme("bearer")
-                        .bearerFormat("JWT"));
-
-        return new OpenAPI()
-                .components(components)
-                .info(apiInfo())
-                .addSecurityItem(securityRequirement);
+    public GroupedOpenApi SwaggerOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Swagger-api")
+                .pathsToMatch("/**")
+                .build();
     }
 
-    private Info apiInfo() {
-        return new Info()
-                .title("SMath") // API의 제목
-                .description("API test") // API에 대한 설명
-                .version("1.0.0"); // API의 버전
-    }
 }

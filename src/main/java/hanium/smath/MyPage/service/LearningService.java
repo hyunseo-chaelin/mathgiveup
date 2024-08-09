@@ -34,14 +34,15 @@ public class LearningService {
             LocalDate startDate = ym.atDay(1);
             LocalDate endDate = ym.atEndOfMonth();
 
+            // 로그인 ID를 이용해 멤버를 조회
             Member member = loginRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
 
-            // 수정 부분: 이전 달부터 데이터를 가져옴
+            // 이전 달부터 데이터를 가져오기 위해 startDate를 한 달 전으로 조정
             LocalDate previousMonthStartDate = startDate.minusMonths(1).withDayOfMonth(1);
             List<LearningRecord> records = repository.findByMemberAndLearningDateBetween(member, previousMonthStartDate, endDate);
 
-            // 월 단위로 필터링
+            // 월 단위로 학습 일자를 필터링
             List<String> learningDays = records.stream()
                     .filter(record -> !record.getLearningDate().isBefore(startDate) && !record.getLearningDate().isAfter(endDate))
                     .map(record -> record.getLearningDate().toString())
@@ -49,13 +50,12 @@ public class LearningService {
 
             System.out.println("Learning days retrieved: " + learningDays);
 
-            // 수정 부분: 전체 기간의 연속 학습일 계산
+            // 전체 기간의 연속 학습일을 계산
             long consecutiveDays = calculateConsecutiveLearningDays(records);
 
             System.out.println("Consecutive learning days: " + consecutiveDays);
 
-
-            // 7일 연속 학습 시 뱃지 수여 로직 추가
+            // 7일 연속 학습 시 뱃지 수여
             achievementService.awardAchievementForConsecutiveLearningDays(loginId, (int) consecutiveDays);
 
             LearningRecordResponse response = new LearningRecordResponse(loginId, yearMonth, learningDays, consecutiveDays);
@@ -66,7 +66,7 @@ public class LearningService {
         }
     }
 
-    // 수정 부분: 연속 학습일 계산 로직 수정
+    // 연속 학습일을 계산하는 로직
     private long calculateConsecutiveLearningDays(List<LearningRecord> records) {
         records.sort((record1, record2) -> record1.getLearningDate().compareTo(record2.getLearningDate()));
 
