@@ -55,6 +55,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(login_id);
                     System.out.println("Loaded UserDetails for loginId: " + login_id);
 
+                    // 사용자 권한 출력
+                    System.out.println("User Authorities: " + userDetails.getAuthorities());  // userDetails 사용
+
                     if (jwtUtil.validateToken(jwt, userDetails)) {
                         System.out.println("JWT Token is valid");
 
@@ -73,6 +76,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } else {
                 System.out.println("Login ID is null or Authentication is already set");
             }
+
+        // 추가: 필터 체인을 통해 다음 필터로 이동하기 전에 SecurityContextHolder의 상태를 확인합니다.
+        System.out.println("Before continuing filter chain: Security Context Authentication = " + SecurityContextHolder.getContext().getAuthentication());
 
         filterChain.doFilter(request, response);
         System.out.println("Filter chain continued");

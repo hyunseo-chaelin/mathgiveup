@@ -3,6 +3,8 @@ package hanium.smath.MyPage.controller;
 import hanium.smath.MyPage.dto.LearningRecordResponse;
 import hanium.smath.MyPage.service.LearningService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +16,12 @@ public class LearningController {
     private LearningService service;
 
     @GetMapping("/records/monthly")
-    public Mono<LearningRecordResponse> getMonthlyLearningRecords(@RequestParam String login_id, @RequestParam String yearMonth) {
-        return service.getMonthlyLearningRecords(login_id, yearMonth);
+    public Mono<LearningRecordResponse> getMonthlyLearningRecords(@RequestParam String yearMonth) {
+        // 현재 인증된 사용자의 정보를 가져옴
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loginId = authentication.getName(); // 인증된 사용자의 로그인 ID를 가져옴
+
+        // 서비스 호출 시 로그인 ID와 월 정보를 전달
+        return service.getMonthlyLearningRecords(loginId, yearMonth);
     }
 }

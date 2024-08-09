@@ -54,7 +54,7 @@ public class EmailService {
         }
     }
 
-    private int generateVerificationCode() {
+    public int generateVerificationCode() {
         Random random = new Random();
         return 1000 + random.nextInt(9000); // 4자리 랜덤 숫자 생성
     }
