@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/learning/**").hasRole("USER") // 여기를 확인
                         .requestMatchers("/api/achievements/**").hasRole("USER")
                         .requestMatchers("/api/community/posts/**").hasRole("USER")
+                        .requestMatchers("/api/community/comments/**").hasRole("USER")
                         .anyRequest().permitAll()
                 )
 

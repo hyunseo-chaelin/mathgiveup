@@ -28,9 +28,9 @@ public class PostService {
         });
     }
 
-    public CompletableFuture<List<PostResponse>> getPostsByLoginId(String loginId) {
+    public CompletableFuture<List<PostResponse>> getPostsByLoginId(String login_id) {
         return CompletableFuture.supplyAsync(() -> {
-            List<Post> posts = postRepository.findByMemberLoginId(loginId);
+            List<Post> posts = postRepository.findByMemberLoginId(login_id);
             return posts.stream().map(post -> PostResponse.builder()
                             .id(post.getIdPost())
                             .title(post.getTitle())
