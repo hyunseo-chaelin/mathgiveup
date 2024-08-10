@@ -13,59 +13,54 @@ import org.springframework.web.bind.annotation.*;
 public class SignupController {
 
     private final SignupService signupService;
-    private final EmailService emailService;
 
     @Autowired
-    public SignupController(SignupService signupService, EmailService emailService) {
+    public SignupController(SignupService signupService) {
         this.signupService = signupService;
-        this.emailService = emailService;
     }
 
-    // 이메일 인증 코드 발송
-    @PostMapping("/send-verification-code")
-    public ResponseEntity<String> sendVerificationCode(@RequestParam String email) {
-        if (signupService.checkEmailExists(email)) {
-            return ResponseEntity.badRequest().body("Email already exists");
+    @PostMapping("/check-loginId")
+    public ResponseEntity<String> checkLoginId(@RequestParam String loginId) {
+        if (signupService.checkLoginIdExists(loginId)) {
+            return ResponseEntity.badRequest().body("Login ID already exists");
         } else {
-            signupService.saveEmail(email);
-            emailService.sendVerificationCode(email, "registration");
-            return ResponseEntity.ok("Verification email sent");
+            return ResponseEntity.ok("Login ID is available");
         }
     }
 
-    // 이메일 인증 코드 확인
+    @PostMapping("/check-email")
+    public ResponseEntity<String> checkEmail(@RequestParam String email) {
+        if (signupService.checkEmailExists(email)) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        } else {
+            signupService.sendVerificationCodeToEmail(email);
+            return ResponseEntity.ok("Email is available. Verification code sent to email.");
+        }
+    }
+
     @PostMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam int code) {
-        if (emailService.verifyEmailCode(email, code)) {
-            signupService.markEmailAsVerified(email);
-            return ResponseEntity.ok("Email verified");
+        boolean isVerified = signupService.verifyEmailCode(email, code);
+
+        if (isVerified) {
+            return ResponseEntity.ok("Email verified successfully");
         } else {
             return ResponseEntity.badRequest().body("Invalid verification code");
         }
     }
 
-    // 회원가입
+
     @PostMapping("/signup")
-    public ResponseEntity<String> registerMember(@RequestBody SignupRequest request) {
-        if (signupService.checkLoginIdExists(request.getLoginId())) {
+    public ResponseEntity<String> registerMember(@RequestBody SignupRequest signupRequest) {
+        if (signupService.checkLoginIdExists(signupRequest.getLoginId())) {
             return ResponseEntity.badRequest().body("Login ID already exists");
         }
 
-        if (!signupService.isEmailVerified(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Email is not verified");
+        if (!signupService.verifyEmailCode(signupRequest.getEmail(), signupRequest.getVerificationCode())) {
+            return ResponseEntity.badRequest().body("Email verification failed");
         }
 
-        signupService.registerMember(
-                request.getEmail(),
-                request.getName(),
-                request.getLoginId(),
-                request.getLoginPwd(),
-                request.getNickname(),
-                request.getGrade(),
-                request.getBirthdate(),
-                request.getPhoneNum()
-        );
-
+        signupService.registerMember(signupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("Member registered successfully");
     }
 }
