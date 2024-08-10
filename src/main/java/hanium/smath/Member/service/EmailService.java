@@ -4,6 +4,7 @@ import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.SignupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -26,16 +27,77 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
     private final EmailVerificationRepository emailVerificationRepository;
     private final LoginRepository loginRepository;
+    private final SignupRepository signupRepository;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, LoginRepository loginRepository) {
+    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, LoginRepository loginRepository, SignupRepository signupRepository) {
         this.javaMailSender = javaMailSender;
         this.emailVerificationRepository = emailVerificationRepository;
         this.loginRepository = loginRepository;
+        this.signupRepository = signupRepository;
     }
+
+    //(Signup): 이메일만 받고 인증 코드를 전송
+    public void sendVerificationCodeToEmailOnly(String email) {
+        System.out.println("EmailService: Sending verification code to email: " + email);
+        int code = generateVerificationCode();
+        sendEmail(email, "Verification Code", "Your verification code is: " + code);
+        saveVerificationCodeByEmail(email, code);
+        System.out.println("EmailService: Verification code sent to email only: " + code);
+    }
+
+    // 이메일만으로 인증 코드를 저장
+    private void saveVerificationCodeByEmail(String email, int code) {
+        // 이메일로 이전에 저장된 인증 코드가 있으면 해당 항목을 무효화합니다.
+        Optional<EmailVerification> existingVerification = emailVerificationRepository.findTopByEmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email);
+
+        if (existingVerification.isPresent()) {
+            EmailVerification oldVerification = existingVerification.get();
+            oldVerification.setVerifiedEmail(true); // 이전 인증 코드를 무효화
+            emailVerificationRepository.save(oldVerification);
+        }
+
+        // 새로운 인증 코드 생성 및 저장
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.setEmail(email); // 이메일 설정
+        emailVerification.setVerificationCode(code);
+        emailVerification.setVerifiedEmail(false);
+        emailVerification.setCreateTime(LocalDateTime.now());
+        emailVerificationRepository.save(emailVerification);
+        System.out.println("EmailService: Verification code saved for email: " + email);
+    }
+
+
+    // 이메일과 인증 코드를 검증하는 메서드
+    public boolean verifyEmailCodeByEmail(String email, int code) {
+        System.out.println("EmailService: Verifying email code for email: " + email + ", code: " + code);
+        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByEmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email);
+
+        if (optionalEmailVerification.isPresent()) {
+            EmailVerification emailVerification = optionalEmailVerification.get();
+            System.out.println("EmailService: Found verification code for email: " + email + ", storedCode: " + emailVerification.getVerificationCode());
+            boolean verified = code == emailVerification.getVerificationCode();
+
+            if (verified) {
+                // 인증 성공 시, 인증 상태를 true로 변경
+                emailVerification.setVerifiedEmail(true);
+                emailVerificationRepository.save(emailVerification);
+                System.out.println("EmailService: Email code verification successful for email: " + email);
+            } else {
+                System.out.println("EmailService: Email code verification failed for email: " + email);
+            }
+
+            return verified;
+        } else {
+            System.out.println("EmailService: No verification code found for email: " + email + " or email already verified.");
+            return false;
+        }
+    }
+
+
 
     public void sendEmail(String to, String subject, String text) {
         System.out.println("EmailService: Preparing to send email to: " + to);
