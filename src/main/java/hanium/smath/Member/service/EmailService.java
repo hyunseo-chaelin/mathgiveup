@@ -142,19 +142,49 @@ public class EmailService {
         System.out.println("EmailService: Verification code sent: " + code);
     }
 
-    // 생성된 인증 코드를 데이터베이스에 저장
+    // 비번 변경할 때 코드 저장하는 함수.
     private void saveVerificationCode(String loginId, int code) {
         System.out.println("EmailService: Saving verification code for loginId: " + loginId + ", code: " + code);
+
+        // loginId를 기반으로 멤버를 찾습니다.
         Member member = loginRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid login_id: " + loginId));
-        EmailVerification emailVerification = new EmailVerification();
-        emailVerification.setMember(member);
-        emailVerification.setVerificationCode(code);
-        emailVerification.setVerifiedEmail(false);
-        emailVerification.setCreateTime(LocalDateTime.now());
+                .orElseThrow(() -> {
+                    System.out.println("EmailService: No member found with loginId: " + loginId);
+                    return new IllegalArgumentException("No member found with loginId: " + loginId);
+                });
+
+        // 기존의 이메일 인증 레코드를 찾습니다. 없으면 새로 생성하지 않고 null을 반환합니다.
+        EmailVerification emailVerification = emailVerificationRepository.findByMember(member)
+                .orElse(null);
+
+        if (emailVerification == null) {
+            System.out.println("EmailService: No email verification record found for loginId: " + loginId);
+            return; // 이메일 인증 레코드가 없으면 아무 작업도 하지 않습니다.
+        }
+
+        // 인증 코드를 업데이트합니다.
+        emailVerification.updateVerificationCode(code);
+
+        // 인증 코드 저장
         emailVerificationRepository.save(emailVerification);
-        System.out.println("EmailService: Verification code saved");
+
+        System.out.println("EmailService: Verification code updated and saved for loginId: " + loginId);
     }
+
+
+//    // 생성된 인증 코드를 데이터베이스에 저장
+//    private void saveVerificationCode(String loginId, int code) {
+//        System.out.println("EmailService: Saving verification code for loginId: " + loginId + ", code: " + code);
+//        Member member = loginRepository.findByLoginId(loginId)
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid login_id: " + loginId));
+//        EmailVerification emailVerification = new EmailVerification();
+//        emailVerification.setMember(member);
+//        emailVerification.setVerificationCode(code);
+//        emailVerification.setVerifiedEmail(false);
+//        emailVerification.setCreateTime(LocalDateTime.now());
+//        emailVerificationRepository.save(emailVerification);
+//        System.out.println("EmailService: Verification code saved");
+//    }
 
     //사용자가 입력한 인증 코드가 유효한지 검증
     public boolean verifyEmailCode(String loginId, int code) {
