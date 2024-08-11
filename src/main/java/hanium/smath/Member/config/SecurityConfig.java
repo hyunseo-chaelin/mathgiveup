@@ -46,7 +46,13 @@ public class SecurityConfig {
 
                 // 서버 세션 유지
                 .sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
+                // 카카오 소셜 로그인 설정 추가
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/loginSuccess")  // 로그인 성공 후 리디렉션할 URL
+                        .failureUrl("/loginFailure")         // 로그인 실패 후 리디렉션할 URL
+                );
 
 
         // JwtRequestFilter를 UsernamePasswordAuthenticationFilter 전에 추가합니다.

@@ -1,13 +1,15 @@
 package hanium.smath.Member.controller;
 
-//import hanium.smath.Member.dto.AuthResponse;
+import hanium.smath.Member.dto.KakaoLoginRequest; // KakaoLoginRequest 추가
 import hanium.smath.Member.dto.GoogleLoginRequest;
 import hanium.smath.Member.dto.AuthResponse;
+import hanium.smath.Member.dto.KakaoProfile;
 import hanium.smath.Member.dto.LoginRequest;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.security.JwtUtil;
 import hanium.smath.Member.service.EmailService;
 import hanium.smath.Member.service.GoogleLoginService;
+import hanium.smath.Member.service.KakaoService;
 import hanium.smath.Member.service.LoginService;
 
 import java.time.LocalDate;
@@ -24,9 +26,10 @@ public class LoginController {
     private final GoogleLoginService googleLoginService;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
+    private final KakaoService kakaoService;
 
     @Autowired
-    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil, EmailService emailService) {
+    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil, EmailService emailService, KakaoService kakaoService) {
         this.loginService = loginService; // controller가 생성될 때 service 주입하기
         System.out.println("MemberController instantiated with MemberService");
         this.googleLoginService = googleLoginService;
@@ -35,6 +38,8 @@ public class LoginController {
         System.out.println("MemberController instantiated with jwtUtil");
         this.emailService = emailService;
         System.out.println("MemberController instantiated with email");
+        this.kakaoService = kakaoService;
+        System.out.println("MemberController instantiated with kakaoService");
     }
 
     // 로그인
@@ -105,6 +110,35 @@ public class LoginController {
             return ResponseEntity.status(500).body("Error during login: " + e.getMessage());
         }
     }
+
+    // 카카오 로그인 추가 부분
+    @PostMapping("/kakao-login")
+    public ResponseEntity<String> kakaoLogin(@RequestBody KakaoLoginRequest request) {
+        try {
+            System.out.println("Kakao access token received: " + request.getAccessToken());
+
+            // 카카오 사용자 정보 가져오기
+            KakaoProfile kakaoProfile = kakaoService.getKakaoProfile(request.getAccessToken());
+
+            // 사용자 정보로 로그인 처리
+            Member member = loginService.processKakaoLogin(kakaoProfile);
+
+            if (member != null) {
+                // JWT 토큰 생성
+                String token = jwtUtil.generateToken(member.getLoginId());
+                System.out.println("Member found : " + member.getNickname());
+                return ResponseEntity.ok("Login successful! Token: " + token);
+            } else {
+                System.out.println("Failed to process kakao login request");
+                return ResponseEntity.status(401).body("Login failed for Kakao ID");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error during Kakao login: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error during Kakao login: " + e.getMessage());
+        }
+    }
+    // 카카오 로그인 추가 끝
 
     // 아이디 찾기
     @GetMapping("/find/loginId")
@@ -202,4 +236,6 @@ public class LoginController {
             return ResponseEntity.status(400).body("Failed to change password.");
         }
     }
+
+
 }

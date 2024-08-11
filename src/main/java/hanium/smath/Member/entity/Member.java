@@ -59,4 +59,7 @@ public class Member {
 
     @Column(name = "google_id", nullable = true, unique = true)
     private String googleId; // 구글 아이디 추가
+
+    @Column(name = "kakaoId", nullable = true, unique = true)
+    private String kakaoId; // 구글 아이디 추가
 }

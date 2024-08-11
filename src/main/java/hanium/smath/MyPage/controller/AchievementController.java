@@ -1,16 +1,14 @@
 package hanium.smath.MyPage.controller;
 
-import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.LoginRepository;
-import hanium.smath.MyPage.entity.Achievement;
-import hanium.smath.MyPage.service.AchievementService;
+import hanium.smath.MyPage.dto.AchievementResponse;
 import hanium.smath.Member.security.JwtUtil;
+import hanium.smath.MyPage.service.AchievementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/achievements")
@@ -20,20 +18,36 @@ public class AchievementController {
     private AchievementService achievementService;
 
     @Autowired
-    private LoginRepository loginRepository;
-
-    @Autowired
     private JwtUtil jwtUtil;
 
-    @GetMapping
-    public List<Achievement> getAchievements() {
-        // 현재 인증된 사용자의 정보를 가져옴
+    // 7일 연속 학습 달성 관련 데이터를 반환하는 엔드포인트
+    @GetMapping("/consecutive/7days")
+    public ResponseEntity<AchievementResponse> getConsecutive7DayLearningAchievements() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loginId = authentication.getName(); // 인증된 사용자의 로그인 ID를 가져옴
+        String loginId = authentication.getName();
 
-        Member member = loginRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
+        AchievementResponse response = achievementService.getConsecutiveLearningData(loginId, 7);
 
-        return achievementService.getAchievements(member);
+        return ResponseEntity.ok(response);
     }
+
+    // 30일 연속 학습 달성 관련 데이터를 반환하는 엔드포인트
+    @GetMapping("/consecutive/30days")
+    public ResponseEntity<AchievementResponse> getConsecutive30DayLearningAchievements() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String login_id = authentication.getName();
+
+        AchievementResponse response = achievementService.getConsecutiveLearningData(login_id, 30);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public AchievementResponse getAllAchievements() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String login_id = authentication.getName();
+
+        return achievementService.getAllAchievements(login_id);
+    }
+
 }

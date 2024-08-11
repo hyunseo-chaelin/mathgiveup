@@ -1,6 +1,7 @@
 package hanium.smath.Member.service;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.dto.KakaoProfile;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,5 +63,31 @@ public class LoginService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    // 카카오 ID로 사용자를 조회하는 메서드 추가
+    public Member findByKakaoId(String kakaoId) {
+        System.out.println("Fetching member by kakaoId: " + kakaoId);
+        return loginRepository.findByKakaoId(kakaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid kakao_id: " + kakaoId));
+    }
+
+    // 카카오 사용자 정보를 기반으로 회원을 생성하고 저장하는 메서드 추가
+    public Member processKakaoLogin(KakaoProfile kakaoProfile) {
+        String kakaoId = String.valueOf(kakaoProfile.getId());
+
+        // 카카오 ID로 기존 사용자가 있는지 확인
+        return loginRepository.findByKakaoId(kakaoId)
+                .orElseGet(() -> {
+                    // 존재하지 않으면 새로운 회원 생성
+                    Member newMember = new Member();
+                    newMember.setKakaoId(kakaoId);
+                    newMember.setLoginId(kakaoId); // 이 부분은 적절히 수정 필요
+                    newMember.setEmail(kakaoProfile.getKakaoAccount().getEmail());
+                    newMember.setNickname(kakaoProfile.getKakaoAccount().getProfile().getNickname());
+                    // 필요한 추가 정보 설정
+                    save(newMember);
+                    return newMember;
+                });
     }
 }

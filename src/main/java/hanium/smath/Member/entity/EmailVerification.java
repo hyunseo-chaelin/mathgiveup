@@ -15,7 +15,7 @@ public class EmailVerification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEmailVerification;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "login_id", referencedColumnName = "login_id")
     private Member member;
 
@@ -34,6 +34,12 @@ public class EmailVerification {
     public EmailVerification(Member member, int verificationCode) {
         this.verifiedEmail = false; // 새 인증 항목에 대한 기본값
         this.createTime = LocalDateTime.now(); // 생성 시간을 현재 시간으로 설정
+    }
 
+    // 인증 코드를 업데이트하는 메서드
+    public void updateVerificationCode(int verificationCode) {
+        this.verificationCode = verificationCode;
+        this.verifiedEmail = false; // 코드가 변경되면 다시 검증 필요
+        this.createTime = LocalDateTime.now(); // 코드 갱신 시간 업데이트
     }
 }

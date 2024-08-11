@@ -12,4 +12,7 @@ public interface LoginRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmailAndBirthdate(String email, LocalDate birthdate);
     Optional<Member> findByLoginId(String loginId);
     Optional<Member> findByGoogleId(String googleId);
+
+    // 카카오 ID로 회원을 찾는 메서드 추가
+    Optional<Member> findByKakaoId(String kakaoId);  // 카카오 ID로 사용자 조회
 }
