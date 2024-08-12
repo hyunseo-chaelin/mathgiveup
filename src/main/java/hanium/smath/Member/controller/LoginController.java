@@ -252,10 +252,10 @@ public class LoginController {
 
     // 이메일로 보낸 인증 코드를 검증하는 API
     @PatchMapping("/find/loginId/email/verify")
-    public ResponseEntity<String> verifyCodeFindId(@RequestParam String email, @RequestParam int code) {
+    public ResponseEntity<String> verifyCodeFindId(@RequestParam String email, @RequestParam String code) {
         System.out.println("EmailVerificationController: Verifying code for email: " + email + ", code: " + code);
-
-        boolean codeValid = emailService.verifyEmailCodeByEmail(email, code);
+        int codeInt = Integer.parseInt(code); // 수정: 문자열 코드를 정수로 변환
+        boolean codeValid = emailService.verifyEmailCodeByEmail(email, codeInt);
         if (codeValid) {
             return ResponseEntity.ok("Verification code valid.");
         } else {
