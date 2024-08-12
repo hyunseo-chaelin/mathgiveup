@@ -238,7 +238,7 @@ public class LoginController {
     }
 
     // 이메일로 인증 코드를 전송하는 API
-    @PostMapping("find/loginId/send/email")
+    @PatchMapping("find/loginId/send/email")
     public ResponseEntity<String> sendEmail(@RequestParam String email) {
         System.out.println("EmailController: Sending verification code to email: " + email);
         try {
@@ -252,10 +252,10 @@ public class LoginController {
 
     // 이메일로 보낸 인증 코드를 검증하는 API
     @PatchMapping("/find/loginId/email/verify")
-    public ResponseEntity<String> verifyCodeFindId(@RequestParam String email, @RequestParam String code) {
+    public ResponseEntity<String> verifyCodeFindId(@RequestParam String email, @RequestParam int code) {
         System.out.println("EmailVerificationController: Verifying code for email: " + email + ", code: " + code);
-        int codeInt = Integer.parseInt(code); // 수정: 문자열 코드를 정수로 변환
-        boolean codeValid = emailService.verifyEmailCodeByEmail(email, codeInt);
+
+        boolean codeValid = emailService.verifyEmailCodeByEmail(email, code);
         if (codeValid) {
             return ResponseEntity.ok("Verification code valid.");
         } else {
