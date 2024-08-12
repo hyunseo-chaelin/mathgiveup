@@ -19,6 +19,7 @@ public class EmailVerification {
     @JoinColumn(name = "login_id", referencedColumnName = "login_id")
     private Member member;
 
+    @Column (name="email", length = 100, nullable = false, unique = true)
     private String email;
     private int verificationCode;
     private boolean verifiedEmail;
@@ -42,4 +43,5 @@ public class EmailVerification {
         this.verifiedEmail = false; // 코드가 변경되면 다시 검증 필요
         this.createTime = LocalDateTime.now(); // 코드 갱신 시간 업데이트
     }
+
 }
