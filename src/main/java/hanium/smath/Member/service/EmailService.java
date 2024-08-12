@@ -172,6 +172,36 @@ public class EmailService {
     }
 
 
+    // 인증 코드를 생성하여 지정된 이메일로 전송하고, 데이터베이스에 저장
+    public void sendEmail(String email) {
+        System.out.println("EmailService: Sending verification code to email: " + email);
+
+        // 이전 인증 코드 무효화 (이메일 기반)
+        invalidateOldVerificationCodesByEmail(email);
+
+        // 새로운 인증 코드 생성
+        int code = generateVerificationCode();
+
+        // 이메일 전송
+        sendEmail(email, "Verification Code", "Your verification code is: " + code);
+
+        // 인증 코드 저장 (이메일 기반)
+        saveVerificationCodeByEmail(email, code);
+
+        System.out.println("EmailService: Verification code sent: " + code);
+    }
+
+    // 이메일 기반으로 이전 인증 코드를 무효화하는 메서드
+    private void invalidateOldVerificationCodesByEmail(String email) {
+        System.out.println("EmailService: Invalidating old verification codes for email: " + email);
+        emailVerificationRepository.findTopByEmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email)
+                .ifPresent(emailVerification -> {
+                    emailVerification.setVerifiedEmail(true);
+                    emailVerificationRepository.save(emailVerification);
+                    System.out.println("EmailService: Old verification code invalidated for email: " + email);
+                });
+    }
+
 //    // 생성된 인증 코드를 데이터베이스에 저장
 //    private void saveVerificationCode(String loginId, int code) {
 //        System.out.println("EmailService: Saving verification code for loginId: " + loginId + ", code: " + code);

@@ -237,5 +237,31 @@ public class LoginController {
         }
     }
 
+    // 이메일로 인증 코드를 전송하는 API
+    @PostMapping("find/loginId/send/email")
+    public ResponseEntity<String> sendEmail(@RequestParam String email) {
+        System.out.println("EmailController: Sending verification code to email: " + email);
+        try {
+            emailService.sendEmail(email);
+            return ResponseEntity.ok("Verification code sent to: " + email);
+        } catch (Exception e) {
+            System.err.println("Error sending email: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error sending verification code: " + e.getMessage());
+        }
+    }
+
+    // 이메일로 보낸 인증 코드를 검증하는 API
+    @PatchMapping("/find/loginId/email/verify")
+    public ResponseEntity<String> verifyCodeFindId(@RequestParam String email, @RequestParam int code) {
+        System.out.println("EmailVerificationController: Verifying code for email: " + email + ", code: " + code);
+
+        boolean codeValid = emailService.verifyEmailCodeByEmail(email, code);
+        if (codeValid) {
+            return ResponseEntity.ok("Verification code valid.");
+        } else {
+            System.out.println("EmailVerificationController: Invalid verification code for email: " + email);
+            return ResponseEntity.status(400).body("Invalid verification code.");
+        }
+    }
 
 }
