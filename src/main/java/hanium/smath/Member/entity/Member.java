@@ -41,9 +41,6 @@ public class Member {
     @Column(name = "birthdate", nullable = false)
     private LocalDate birthdate;
 
-    @Column(name = "email", length = 100, nullable = false, unique = true)
-    private String email;
-
     @Column(name = "is_email_verified", nullable = false)
     private boolean isEmailVerified;
 
@@ -62,4 +59,11 @@ public class Member {
 
     @Column(name = "kakaoId", nullable = true, unique = true)
     private String kakaoId; // 구글 아이디 추가
+
+    @Column(unique = true)
+    private String email;
+
+    @OneToOne
+    @JoinColumn(name = "email", referencedColumnName ="email", insertable = false, updatable = false)
+    private EmailVerification emailVerification;
 }

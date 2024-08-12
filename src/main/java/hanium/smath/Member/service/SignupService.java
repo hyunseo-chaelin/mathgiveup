@@ -1,12 +1,15 @@
 package hanium.smath.Member.service;
 
+import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.SignupRepository;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.dto.SignupRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -42,24 +45,25 @@ public class SignupService {
     }
 
     public void registerMember(SignupRequest signupRequest) {
-        Optional<Member> optionalMember = signupRepository.findByEmail(signupRequest.getEmail());
-        Member member;
+        EmailVerification emailVerification = emailVerificationRepository.findEmailVerificationByEmail(signupRequest.getEmail());
 
-        if (optionalMember.isPresent()) {
-            member = optionalMember.get();
-        } else {
-            throw new IllegalArgumentException("Email not verified or not found.");
+        if (emailVerification == null) {
+            throw new IllegalArgumentException("Email verification record not found for email: " + signupRequest.getEmail());
         }
 
-        member.setLoginId(signupRequest.getLoginId());
-        member.setLoginPwd(signupRequest.getLoginPwd());
-        member.setName(signupRequest.getName());
-        member.setNickname(signupRequest.getNickname());
-        member.setBirthdate(signupRequest.getBirthdate());
-        member.setGrade(signupRequest.getGrade());
-        member.setPhoneNum(signupRequest.getPhoneNum());
-        member.setEmailVerified(true); // 이메일 인증 완료로 설정
+        Member member = Member.builder()
+                .email(emailVerification.getEmail())
+                .loginId(signupRequest.getLoginId())
+                .loginPwd(signupRequest.getLoginPwd())
+                .name(signupRequest.getName())
+                .nickname(signupRequest.getNickname())
+                .birthdate(signupRequest.getBirthdate())
+                .grade(signupRequest.getGrade())
+                .phoneNum(signupRequest.getPhoneNum())
+                .isEmailVerified(true) // 이메일 인증 완료로 설정
+                .build();
 
         signupRepository.save(member);
     }
+
 }
