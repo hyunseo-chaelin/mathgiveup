@@ -54,9 +54,8 @@ public class LoginService {
         return loginRepository.findByLoginId(loginId).isPresent();
     }
 
-    // 사용자의 비밀번호를 변경
-    public boolean changeUserPassword(String loginId, String newPassword) {
-        return loginRepository.findByLoginId(loginId)
+    public boolean changeUserPassword(String email, String newPassword) {
+        return loginRepository.findByEmail(email)
                 .map(member -> {
                     member.setLoginPwd(newPassword);
                     loginRepository.save(member);
