@@ -74,7 +74,9 @@ public class EmailService {
     // 이메일과 인증 코드를 검증하는 메서드
     public boolean verifyEmailCodeByEmail(String email, int code) {
         System.out.println("EmailService: Verifying email code for email: " + email + ", code: " + code);
-        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByEmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email);
+
+        // 필드 verifiedEmail 상태를 무시하고, 이메일로 최신의 인증 기록을 가져옴
+        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByEmailOrderByCreateTimeDesc(email);
 
         if (optionalEmailVerification.isPresent()) {
             EmailVerification emailVerification = optionalEmailVerification.get();
@@ -96,8 +98,6 @@ public class EmailService {
             return false;
         }
     }
-
-
 
     public void sendEmail(String to, String subject, String text) {
         System.out.println("EmailService: Preparing to send email to: " + to);
@@ -172,6 +172,14 @@ public class EmailService {
     }
 
 
+    // 이메일 전송 메서드
+    public void sendVerificationEmail(String to, int code) {
+        String subject = "Verification Code";
+        String text = "Your verification code is: " + code;
+        sendEmail(to, subject, text);
+    }
+
+
     // 인증 코드를 생성하여 지정된 이메일로 전송하고, 데이터베이스에 저장
     public void sendEmail(String email) {
         System.out.println("EmailService: Sending verification code to email: " + email);
@@ -216,30 +224,43 @@ public class EmailService {
 //        System.out.println("EmailService: Verification code saved");
 //    }
 
-    //사용자가 입력한 인증 코드가 유효한지 검증
-    public boolean verifyEmailCode(String loginId, int code) {
-        System.out.println("EmailService: Verifying email code for loginId: " + loginId + ", code: " + code);
-        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_LoginIdAndVerifiedEmailFalseOrderByCreateTimeDesc(loginId);
+    public boolean verifyEmailCode(String email, String code) {
+        System.out.println("EmailService: Verifying email code for email: " + email + ", code: " + code);
+
+        // String을 int로 변환
+        int codeAsInt;
+        try {
+            codeAsInt = Integer.parseInt(code);
+        } catch (NumberFormatException e) {
+            System.out.println("EmailService: Invalid format for code: " + code);
+            return false; // 잘못된 포맷의 코드일 경우 검증 실패로 처리
+        }
+
+        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_EmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email);
 
         if (optionalEmailVerification.isPresent()) {
             EmailVerification emailVerification = optionalEmailVerification.get();
-            System.out.println("EmailService: Found verification code for loginId: " + loginId + ", storedCode: " + emailVerification.getVerificationCode());
-            boolean verified = code == emailVerification.getVerificationCode();
-            System.out.println("EmailService: Email code verification result for loginId: " + loginId + " is " + verified);
+            System.out.println("EmailService: Found verification code for email: " + email + ", storedCode: " + emailVerification.getVerificationCode());
+
+            // 코드 비교
+            boolean verified = codeAsInt == emailVerification.getVerificationCode();
+            System.out.println("EmailService: Email code verification result for email: " + email + " is " + verified);
             return verified;
         } else {
-            System.out.println("EmailService: No verification code found for loginId: " + loginId + " or email already verified.");
+            System.out.println("EmailService: No verification code found for email: " + email + " or email already verified.");
             return false;
         }
     }
 
-    public void invalidateVerificationCode(String loginId, int code) {
+    public void invalidateVerificationCode(String loginId, String code) {
         System.out.println("EmailService: Invalidating verification code for loginId: " + loginId + ", code: " + code);
         Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_LoginIdAndVerifiedEmailFalseOrderByCreateTimeDesc(loginId);
 
         if (optionalEmailVerification.isPresent()) {
             EmailVerification emailVerification = optionalEmailVerification.get();
-            if (code == emailVerification.getVerificationCode()) {
+
+            // String 코드 비교 (equals 사용)
+            if (code.equals(String.valueOf(emailVerification.getVerificationCode()))) {
                 emailVerification.setVerifiedEmail(true);
                 emailVerificationRepository.save(emailVerification);
                 System.out.println("EmailService: Verification code invalidated for loginId: " + loginId + ", code: " + code);
