@@ -4,15 +4,10 @@ import hanium.smath.Member.dto.SignupRequest;
 import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.service.SignupService;
-import hanium.smath.Member.service.EmailService;
-import lombok.AllArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/members")

@@ -5,14 +5,8 @@ import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.SignupRepository;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.dto.SignupRequest;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 public class SignupService {
@@ -59,7 +53,6 @@ public class SignupService {
                 .nickname(signupRequest.getNickname())
                 .birthdate(signupRequest.getBirthdate())
                 .grade(signupRequest.getGrade())
-                .phoneNum(signupRequest.getPhoneNum())
                 .isEmailVerified(true) // 이메일 인증 완료로 설정
                 .build();
 

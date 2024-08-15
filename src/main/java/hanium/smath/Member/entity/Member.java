@@ -48,9 +48,6 @@ public class Member {
     @Column(name = "create_time", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createTime;
 
-    @Column(name = "phone_num", length = 30, nullable = true)
-    private String phoneNum;
-
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin;
 
