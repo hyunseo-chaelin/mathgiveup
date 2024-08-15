@@ -46,8 +46,9 @@ public class SignupController {
     }
 
     @PatchMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam int code) {
-        boolean isVerified = signupService.verifyEmailCode(email, code);
+    public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam String code) {
+        int codeInt = Integer.parseInt(code);
+        boolean isVerified = signupService.verifyEmailCode(email, codeInt);
 
         if (isVerified) {
             return ResponseEntity.ok("Email verified successfully");
