@@ -15,5 +15,4 @@ public class SignupRequest {
     private String nickname;
     private int grade;
     private LocalDate birthdate; // 생년월일 추가
-    private String phoneNum; // 전화번호 추가
 }
