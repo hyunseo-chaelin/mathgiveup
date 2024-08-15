@@ -60,7 +60,7 @@ public class Member {
     @Column(unique = true)
     private String email;
 
-    @OneToOne
-    @JoinColumn(name = "email", referencedColumnName ="email", insertable = false, updatable = false)
-    private EmailVerification emailVerification;
+//    @OneToOne
+//    @JoinColumn(name = "email", referencedColumnName ="email", insertable = false, updatable = false)
+//    private EmailVerification emailVerification;
 }
