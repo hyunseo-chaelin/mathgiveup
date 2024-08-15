@@ -4,7 +4,6 @@ import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.repository.LoginRepository;
-import hanium.smath.Member.repository.SignupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -27,17 +26,15 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
     private final EmailVerificationRepository emailVerificationRepository;
     private final LoginRepository loginRepository;
-    private final SignupRepository signupRepository;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, LoginRepository loginRepository, SignupRepository signupRepository) {
+    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, LoginRepository loginRepository) {
         this.javaMailSender = javaMailSender;
         this.emailVerificationRepository = emailVerificationRepository;
         this.loginRepository = loginRepository;
-        this.signupRepository = signupRepository;
     }
 
     //(Signup): 이메일만 받고 인증 코드를 전송
@@ -208,48 +205,6 @@ public class EmailService {
                     emailVerificationRepository.save(emailVerification);
                     System.out.println("EmailService: Old verification code invalidated for email: " + email);
                 });
-    }
-
-//    // 생성된 인증 코드를 데이터베이스에 저장
-//    private void saveVerificationCode(String loginId, int code) {
-//        System.out.println("EmailService: Saving verification code for loginId: " + loginId + ", code: " + code);
-//        Member member = loginRepository.findByLoginId(loginId)
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid login_id: " + loginId));
-//        EmailVerification emailVerification = new EmailVerification();
-//        emailVerification.setMember(member);
-//        emailVerification.setVerificationCode(code);
-//        emailVerification.setVerifiedEmail(false);
-//        emailVerification.setCreateTime(LocalDateTime.now());
-//        emailVerificationRepository.save(emailVerification);
-//        System.out.println("EmailService: Verification code saved");
-//    }
-
-    public boolean verifyEmailCode(String email, String code) {
-        System.out.println("EmailService: Verifying email code for email: " + email + ", code: " + code);
-
-        // String을 int로 변환
-        int codeAsInt;
-        try {
-            codeAsInt = Integer.parseInt(code);
-        } catch (NumberFormatException e) {
-            System.out.println("EmailService: Invalid format for code: " + code);
-            return false; // 잘못된 포맷의 코드일 경우 검증 실패로 처리
-        }
-
-        Optional<EmailVerification> optionalEmailVerification = emailVerificationRepository.findTopByMember_EmailAndVerifiedEmailFalseOrderByCreateTimeDesc(email);
-
-        if (optionalEmailVerification.isPresent()) {
-            EmailVerification emailVerification = optionalEmailVerification.get();
-            System.out.println("EmailService: Found verification code for email: " + email + ", storedCode: " + emailVerification.getVerificationCode());
-
-            // 코드 비교
-            boolean verified = codeAsInt == emailVerification.getVerificationCode();
-            System.out.println("EmailService: Email code verification result for email: " + email + " is " + verified);
-            return verified;
-        } else {
-            System.out.println("EmailService: No verification code found for email: " + email + " or email already verified.");
-            return false;
-        }
     }
 
     public void invalidateVerificationCode(String loginId, String code) {
