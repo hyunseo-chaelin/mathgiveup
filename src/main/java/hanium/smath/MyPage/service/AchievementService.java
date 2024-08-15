@@ -1,12 +1,12 @@
 package hanium.smath.MyPage.service;
 
-import hanium.smath.Member.repository.LoginRepository;
 import hanium.smath.MyPage.dto.AchievementResponse;
 import hanium.smath.MyPage.entity.Achievement;
 import hanium.smath.MyPage.entity.AchievementType;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.MyPage.repository.AchievementRepository;
 import hanium.smath.MyPage.repository.AchievementTypeRepository;
+import hanium.smath.Member.repository.LoginRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -95,7 +95,6 @@ public class AchievementService {
         return new AchievementResponse(streaksAchieved7Days, streaksAchieved30Days);
     }
 
-
     // 연속 학습 달성 횟수 계산 메서드
     private int calculateConsecutiveLearningCount(Member member, int days) {
         String achievementValue = days == 7 ? "7일 연속 학습 달성" : "30일 연속 학습 달성";
@@ -112,5 +111,4 @@ public class AchievementService {
                 .map(a -> a.getCreateTime().toString())
                 .collect(Collectors.toList());
     }
-
 }

@@ -58,7 +58,8 @@ public class LearningService {
             // 7일 연속 학습 시 뱃지 수여
             achievementService.awardAchievementForConsecutiveLearningDays(loginId, (int) consecutiveDays);
 
-            LearningRecordResponse response = new LearningRecordResponse(loginId, yearMonth, learningDays, consecutiveDays);
+            // 연속 학습일 및 학습 날짜 리스트를 포함한 응답 생성
+            LearningRecordResponse response = new LearningRecordResponse(yearMonth, learningDays, consecutiveDays);
             return Mono.just(response);
         } catch (Exception e) {
             System.err.println("Error fetching learning records: " + e.getMessage());
