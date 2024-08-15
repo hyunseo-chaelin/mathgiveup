@@ -8,6 +8,8 @@ import hanium.smath.Member.dto.SignupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class SignupService {
 
@@ -45,13 +47,15 @@ public class SignupService {
             throw new IllegalArgumentException("Email verification record not found for email: " + signupRequest.getEmail());
         }
 
+        LocalDate birthdate = LocalDate.parse(signupRequest.getBirthdate());
+
         Member member = Member.builder()
                 .email(emailVerification.getEmail())
                 .loginId(signupRequest.getLoginId())
                 .loginPwd(signupRequest.getLoginPwd())
                 .name(signupRequest.getName())
                 .nickname(signupRequest.getNickname())
-                .birthdate(signupRequest.getBirthdate())
+                .birthdate(birthdate)
                 .grade(signupRequest.getGrade())
                 .isEmailVerified(true) // 이메일 인증 완료로 설정
                 .build();
