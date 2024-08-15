@@ -1,7 +1,7 @@
 package hanium.smath.Community.controller;
 
+import hanium.smath.Community.dto.CommentRequest;
 import hanium.smath.Community.dto.CommentResponse;
-import hanium.smath.Community.entity.Comment;
 import hanium.smath.Community.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -26,7 +25,6 @@ public class CommentController {
 
     @GetMapping("/my")
     public CompletableFuture<ResponseEntity<List<CommentResponse>>> getMyComments() {
-        // JWT에서 인증된 사용자의 ID를 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String memberId = authentication.getName(); // JWT에서 가져온 사용자 ID
 
@@ -41,18 +39,11 @@ public class CommentController {
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<String>> createComment(@RequestBody Map<String, Object> payload, Authentication authentication) {
+    public CompletableFuture<ResponseEntity<String>> createComment(@RequestBody CommentRequest request, Authentication authentication) {
         String memberId = authentication.getName(); // JWT에서 인증된 사용자 ID 가져오기
-        String content = (String) payload.get("content"); // 클라이언트가 보낸 댓글 내용
-        Long postId = ((Number) payload.get("postId")).longValue(); // 클라이언트가 보낸 게시물 ID
 
-        // Comment 객체 생성
-        Comment comment = Comment.builder()
-                .content(content)
-                .build();
-
-        System.out.println("Creating comment: " + comment);
-        return commentService.saveComment(comment, memberId, postId)
+        System.out.println("Creating comment for postId: " + request.getPostId());
+        return commentService.saveComment(request, memberId)
                 .thenApply(updateTime -> ResponseEntity.ok(updateTime))
                 .exceptionally(ex -> {
                     System.err.println("Error in createComment: " + ex.getMessage());
@@ -60,13 +51,39 @@ public class CommentController {
                 });
     }
 
-    @GetMapping("/post/{idPost}")
-    public CompletableFuture<ResponseEntity<List<CommentResponse>>> getCommentsByPostId(@PathVariable Long idPost) {
-        System.out.println("Retrieving comments for postId: " + idPost);
-        return commentService.getCommentsByPostId(idPost)
+    @GetMapping("/post/{postId}")
+    public CompletableFuture<ResponseEntity<List<CommentResponse>>> getCommentsByPostId(@PathVariable Long postId) {
+        System.out.println("Retrieving comments for postId: " + postId);
+        return commentService.getCommentsByPostId(postId)
                 .thenApply(comments -> ResponseEntity.ok(comments))
                 .exceptionally(ex -> {
                     System.err.println("Error in getCommentsByPostId: " + ex.getMessage());
+                    return ResponseEntity.status(500).build();
+                });
+    }
+
+    @PatchMapping("/{commentId}")
+    public CompletableFuture<ResponseEntity<String>> updateComment(@PathVariable Long commentId, @RequestBody CommentRequest request, Authentication authentication) {
+        String memberId = authentication.getName(); // JWT에서 인증된 사용자 ID 가져오기
+
+        System.out.println("Updating commentId: " + commentId);
+        return commentService.updateComment(commentId, request, memberId)
+                .thenApply(updateTime -> ResponseEntity.ok(updateTime))
+                .exceptionally(ex -> {
+                    System.err.println("Error in updateComment: " + ex.getMessage());
+                    return ResponseEntity.status(500).build();
+                });
+    }
+
+    @DeleteMapping("/{commentId}")
+    public CompletableFuture<ResponseEntity<Void>> deleteComment(@PathVariable Long commentId, Authentication authentication) {
+        String memberId = authentication.getName(); // JWT에서 인증된 사용자 ID 가져오기
+
+        System.out.println("Deleting commentId: " + commentId);
+        return commentService.deleteComment(commentId, memberId)
+                .thenApply(v -> ResponseEntity.noContent().<Void>build())
+                .exceptionally(ex -> {
+                    System.err.println("Error in deleteComment: " + ex.getMessage());
                     return ResponseEntity.status(500).build();
                 });
     }

@@ -1,13 +1,17 @@
 package hanium.smath.Community.controller;
 
+import hanium.smath.Community.dto.PostRequest;
 import hanium.smath.Community.dto.PostResponse;
 import hanium.smath.Community.entity.Post;
 import hanium.smath.Community.service.PostService;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,20 +24,18 @@ public class PostController {
 
     private final PostService postService;
     private final LoginRepository loginRepository;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public PostController(PostService postService, LoginRepository loginRepository) {
+    public PostController(PostService postService, LoginRepository loginRepository, JwtUtil jwtUtil) {
         this.postService = postService;
         this.loginRepository = loginRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/my")
-    public CompletableFuture<ResponseEntity<List<PostResponse>>> getMyPosts(Authentication authentication) {
-        if (authentication == null) {
-            System.out.println("Authentication object is null");
-            return CompletableFuture.completedFuture(ResponseEntity.status(403).build());
-        }
-        String loginId = authentication.getName();
+    public CompletableFuture<ResponseEntity<List<PostResponse>>> getMyPosts(@AuthenticationPrincipal UserDetails userDetails) {
+        String loginId = userDetails.getUsername();
         System.out.println("Retrieving posts for loginId: " + loginId);
 
         return postService.getPostsByLoginId(loginId)
@@ -48,31 +50,39 @@ public class PostController {
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody Post post, Authentication authentication) {
-        if (authentication == null) {
-            System.out.println("Authentication object is null");
-            return CompletableFuture.completedFuture(ResponseEntity.status(403).build());
-        }
-
+    public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
         String loginId = authentication.getName();
-        Optional<Member> optionalMember = loginRepository.findByLoginId(loginId);
-        if (optionalMember.isEmpty()) {
-            System.out.println("Member not found for loginId: " + loginId);
-            return CompletableFuture.completedFuture(ResponseEntity.status(404).build());
-        }
-        post.setMember(optionalMember.get()); // Ensure the member is set
+        Member member = loginRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-        System.out.println("Post object received: " + post);
-        System.out.println("PostType: " + post.getPostType());
-        System.out.println("Title: " + post.getTitle());
-        System.out.println("Content: " + post.getContent());
+        Post post = Post.builder()
+                .title(postRequest.getTitle())
+                .content(postRequest.getContent())
+                .postType(postRequest.getPostType())
+                .member(member)
+                .build();
 
-        System.out.println("Creating post: " + post);
         return postService.savePost(post)
-                .thenApply(updateTime -> ResponseEntity.ok(updateTime))
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(500).build());
+    }
+
+    @PatchMapping("/{id}")
+    public CompletableFuture<ResponseEntity<String>> updatePost(@PathVariable("id") Long postId, @RequestBody PostRequest postRequest, Authentication authentication) {
+        String loginId = authentication.getName();
+        return postService.updatePost(postId, postRequest, loginId)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(500).build());
+    }
+
+    @DeleteMapping("/{id}")
+    public CompletableFuture<ResponseEntity<Void>> deletePost(@PathVariable("id") Long postId, Authentication authentication) {
+        String loginId = authentication.getName();
+        return postService.deletePost(postId, loginId)
+                .thenApply(v -> ResponseEntity.noContent().<Void>build())  // <Void> 명시적으로 추가
                 .exceptionally(ex -> {
-                    System.err.println("Error in createPost: " + ex.getMessage());
-                    return ResponseEntity.status(500).build();
+                    System.err.println("Error in deletePost: " + ex.getMessage());
+                    return ResponseEntity.status(500).<Void>build();  // <Void> 명시적으로 추가
                 });
     }
 }

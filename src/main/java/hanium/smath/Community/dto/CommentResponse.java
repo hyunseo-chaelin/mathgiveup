@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CommentResponse {
-    private String comment_id;
+    private Long commentId;
     private String content;
-    private String post_id;  // Post의 ID를 저장하는 필드
-    private String login_id;  // Member의 ID를 저장하는 필드
+    private Long postId;
+    private String loginId;
     private String createTime;
     private String updateTime;
 }

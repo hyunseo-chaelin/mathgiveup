@@ -1,5 +1,6 @@
 package hanium.smath.Community.service;
 
+import hanium.smath.Community.dto.CommentRequest;
 import hanium.smath.Community.dto.CommentResponse;
 import hanium.smath.Community.entity.Comment;
 import hanium.smath.Community.entity.Post;
@@ -12,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -29,59 +30,89 @@ public class CommentService {
         this.postRepository = postRepository;
     }
 
-    public CompletableFuture<String> saveComment(Comment comment, String loginId, Long postId) {
+    public CompletableFuture<String> saveComment(CommentRequest request, String loginId) {
         return CompletableFuture.supplyAsync(() -> {
-            // loginId로 Member 조회
             Member member = loginRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
-            // postId로 Post 조회
-            Post post = postRepository.findById(postId)
+            Post post = postRepository.findById(request.getPostId())
                     .orElseThrow(() -> new RuntimeException("Post not found"));
 
-            comment.setMember(member);
-            comment.setPost(post);
-            comment.setCreatedTime(LocalDateTime.now());
-            comment.setUpdatedTime(LocalDateTime.now());
+            Comment comment = Comment.builder()
+                    .content(request.getContent())
+                    .member(member)
+                    .post(post)
+                    .createdTime(LocalDateTime.now())
+                    .updatedTime(LocalDateTime.now())
+                    .build();
 
             commentRepository.save(comment);
             return comment.getUpdatedTime().toString();
         });
     }
 
-    public CompletableFuture<List<CommentResponse>> getCommentsByMemberId(String login_id) {
+    public CompletableFuture<List<CommentResponse>> getCommentsByMemberId(String loginId) {
         return CompletableFuture.supplyAsync(() -> {
-            Member member = loginRepository.findByLoginId(login_id)
+            Member member = loginRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
-            // Member로 댓글 조회
             List<Comment> comments = commentRepository.findByMember(member);
 
-            // comment 엔티티를 commentResponse로 변환
             return comments.stream().map(comment -> CommentResponse.builder()
-                    .comment_id(comment.getComment_id().toString())
+                    .commentId(comment.getComment_id())
                     .content(comment.getContent())
-                    .post_id(comment.getPost().getIdPost().toString())
-                    .login_id(comment.getMember().getLoginId())
+                    .postId(comment.getPost().getIdPost())
+                    .loginId(comment.getMember().getLoginId())
                     .createTime(comment.getCreatedTime().toString())
                     .updateTime(comment.getUpdatedTime().toString())
                     .build()).collect(Collectors.toList());
         });
     }
 
-    public CompletableFuture<List<CommentResponse>> getCommentsByPostId(Long post_id) {
+    public CompletableFuture<List<CommentResponse>> getCommentsByPostId(Long postId) {
         return CompletableFuture.supplyAsync(() -> {
-            Post post = postRepository.findById(post_id).orElseThrow(() -> new RuntimeException("Post not found"));
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Post not found"));
             List<Comment> comments = commentRepository.findByPost(post);
 
             return comments.stream().map(comment -> CommentResponse.builder()
-                    .comment_id(comment.getComment_id().toString())
+                    .commentId(comment.getComment_id())
                     .content(comment.getContent())
-                    .post_id(comment.getPost().getIdPost().toString())
-                    .login_id(comment.getMember().getLoginId())
-                    .comment_id(comment.getCreatedTime().toString())
+                    .postId(comment.getPost().getIdPost())
+                    .loginId(comment.getMember().getLoginId())
+                    .createTime(comment.getCreatedTime().toString())
                     .updateTime(comment.getUpdatedTime().toString())
                     .build()).collect(Collectors.toList());
+        });
+    }
+
+    public CompletableFuture<String> updateComment(Long commentId, CommentRequest request, String loginId) {
+        return CompletableFuture.supplyAsync(() -> {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            if (!comment.getMember().getLoginId().equals(loginId)) {
+                throw new RuntimeException("You are not authorized to update this comment");
+            }
+
+            comment.setContent(request.getContent());
+            comment.setUpdatedTime(LocalDateTime.now());
+            commentRepository.save(comment);
+
+            return comment.getUpdatedTime().toString();
+        });
+    }
+
+    public CompletableFuture<Void> deleteComment(Long commentId, String loginId) {
+        return CompletableFuture.runAsync(() -> {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            if (!comment.getMember().getLoginId().equals(loginId)) {
+                throw new RuntimeException("You are not authorized to delete this comment");
+            }
+
+            commentRepository.delete(comment);
         });
     }
 }
