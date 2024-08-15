@@ -239,9 +239,9 @@ public class LoginController {
     @PatchMapping("/reset/password/change")
     public ResponseEntity<String> changePassword(@RequestParam String email, @RequestParam String new_password, @RequestParam String code) {
         System.out.println("LoginController: Changing password for email: " + email + ", code: " + code);
-
+        int codeInt = Integer.parseInt(code);
         // 인증 코드 검증 (verifiedEmail 필드 상태를 무시하고 검증)
-        boolean codeValid = emailService.verifyEmailCodeByEmail(email, Integer.parseInt(code));
+        boolean codeValid = emailService.verifyEmailCodeByEmail(email, codeInt);
         if (!codeValid) {
             System.out.println("LoginController: Invalid verification code for email: " + email);
             return ResponseEntity.status(400).body("Invalid verification code.");
