@@ -9,4 +9,5 @@ public interface SignupRepository extends JpaRepository<Member, Long> {
 
     // 이메일이 이미 존재하는지 확인
     boolean existsByEmail(String email);
+
 }

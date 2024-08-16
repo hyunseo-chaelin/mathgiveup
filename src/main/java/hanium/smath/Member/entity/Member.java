@@ -20,10 +20,13 @@ public class Member {
     @Column(name = "id_Member")
     private int idMember;
 
+    @Column(name="email", length = 100, nullable = false, unique = true)
+    private String email;
+
     @Column(name = "login_id", length = 30, nullable = true, unique = true)
     private String loginId;
 
-    @Column(name = "login_pwd", length = 30, nullable = true)
+    @Column(name = "login_pwd", length = 300, nullable = true)
     private String loginPwd;
 
     @Column(name = "name", length = 30, nullable = true)
@@ -56,7 +59,4 @@ public class Member {
 
     @Column(name = "kakaoId", nullable = true, unique = true)
     private String kakaoId; // 구글 아이디 추가
-
-    @Column(unique = true)
-    private String email;
 }
