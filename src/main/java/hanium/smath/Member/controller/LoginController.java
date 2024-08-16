@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.service.annotation.GetExchange;
@@ -34,9 +35,10 @@ public class LoginController {
     private final EmailService emailService;
     private final KakaoService kakaoService;
     private final EmailVerificationRepository emailVerificationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil, EmailService emailService, KakaoService kakaoService, EmailVerificationRepository emailVerificationRepository) {
+    public LoginController(LoginService loginService, GoogleLoginService googleLoginService, JwtUtil jwtUtil, EmailService emailService, KakaoService kakaoService, EmailVerificationRepository emailVerificationRepository, PasswordEncoder passwordEncoder) {
         this.loginService = loginService; // controller가 생성될 때 service 주입하기
         System.out.println("MemberController instantiated with MemberService");
         this.googleLoginService = googleLoginService;
@@ -49,6 +51,7 @@ public class LoginController {
         System.out.println("MemberController instantiated with kakaoService");
         this.emailVerificationRepository = emailVerificationRepository;
         System.out.println("MemberController instantiated with emailVerificationRepository");
+        this.passwordEncoder = passwordEncoder;
     }
 
     // 로그인
@@ -72,7 +75,7 @@ public class LoginController {
 
             if (member != null) {
                 System.out.println("Member found : " + loginRequest.getLogin_id());
-                if (member.getLoginPwd().equals(loginRequest.getLogin_pwd())) {
+                if (passwordEncoder.matches(loginRequest.getLogin_pwd(), loginRequest.getLogin_pwd())) {
                     String token;
                     if (loginRequest.isAutoLogin()) {
                         System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLogin_id());
