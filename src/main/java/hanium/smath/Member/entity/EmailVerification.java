@@ -21,6 +21,7 @@ public class EmailVerification {
 
     @Column (name="email", length = 100, nullable = false, unique = true)
     private String email;
+
     private int verificationCode;
     private boolean verifiedEmail;
     private LocalDateTime createTime;

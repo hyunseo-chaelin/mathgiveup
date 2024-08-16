@@ -59,5 +59,4 @@ public class Member {
 
     @Column(name = "kakaoId", nullable = true, unique = true)
     private String kakaoId; // 구글 아이디 추가
-
 }
