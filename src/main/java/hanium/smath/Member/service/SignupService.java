@@ -7,6 +7,10 @@ import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.dto.SignupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
@@ -63,4 +67,19 @@ public class SignupService {
         signupRepository.save(member);
     }
 
+    @Transactional
+    public void deleteCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserLoginId = authentication.getName(); // JWT에서 추출된 사용자 loginId
+
+        // loginId로 사용자 조회
+        Member member = signupRepository.findByLoginId(currentUserLoginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with loginId: " + currentUserLoginId));
+
+        // 회원 삭제
+        signupRepository.delete(member);
+
+        // 해당 사용자의 이메일로 이메일 인증 정보 삭제
+        emailVerificationRepository.deleteByEmail(member.getEmail());
+    }
 }
