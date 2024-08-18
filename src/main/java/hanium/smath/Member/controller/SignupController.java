@@ -112,7 +112,7 @@ public class SignupController {
         // 회원 등록
         signupService.registerMember(signupRequest);
 
-        // 회원 정보 가져오기
+        // 회원 정보 가져오기 - 회원가입 후 자동 로그인
         Member member = loginService.getMemberById(signupRequest.getLoginId());
         if (member == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Signup successful, but failed to retrieve member details", null, null));
@@ -126,4 +126,9 @@ public class SignupController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteMember() {
+        signupService.deleteCurrentUser();
+        return ResponseEntity.ok("Your account has been deleted.");
+    }
 }

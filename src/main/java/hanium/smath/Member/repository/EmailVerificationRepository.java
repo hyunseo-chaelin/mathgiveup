@@ -18,4 +18,5 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
 
     // 추가된 메서드: Member 엔티티를 사용하여 검색
     Optional<EmailVerification> findByMember(Member member);
+    void deleteByEmail(String email);
 }
