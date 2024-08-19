@@ -42,7 +42,7 @@ public class PostService {
                             .id(post.getIdPost())
                             .title(post.getTitle())
                             .content(post.getContent())
-                            .postType(post.getPostType())
+//                            .postType(post.getPostType())
                             .createdTime(post.getCreatedTime().toString())
                             .updatedTime(post.getUpdatedTime().toString())
                             .build())
@@ -63,7 +63,7 @@ public class PostService {
 
             post.setTitle(request.getTitle());
             post.setContent(request.getContent());
-            post.setPostType(request.getPostType());
+//            post.setPostType(request.getPostType());
             postRepository.save(post);
 
             return post.getUpdatedTime().toString();
