@@ -1,5 +1,7 @@
 package hanium.smath.Member.controller;
 
+import hanium.smath.Member.dto.NicknameChangeRequest;
+import hanium.smath.Member.dto.SignupResponse;
 import hanium.smath.Member.security.JwtUtil;
 import hanium.smath.Member.security.JwtRequestFilter;
 import hanium.smath.Member.dto.LoginResponse;
@@ -93,16 +95,16 @@ public class SignupController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<LoginResponse> registerMember(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<SignupResponse> registerMember(@RequestBody SignupRequest signupRequest) {
         // 이메일 인증 정보 가져오기
         EmailVerification optionalEmailVerification = emailVerificationRepository.findEmailVerificationByEmail(signupRequest.getEmail());
 
         if (optionalEmailVerification == null || !optionalEmailVerification.isVerifiedEmail()) {
-            return ResponseEntity.badRequest().body(new LoginResponse("Email verification failed", null, null));
+            return ResponseEntity.badRequest().body(null);
         }
 
         if (signupService.checkLoginIdExists(signupRequest.getLoginId())) {
-            return ResponseEntity.badRequest().body(new LoginResponse("Login ID already exists", null, null));
+            return ResponseEntity.badRequest().body(null);
         }
 
         // 비밀번호 암호화
@@ -115,14 +117,14 @@ public class SignupController {
         // 회원 정보 가져오기 - 회원가입 후 자동 로그인
         Member member = loginService.getMemberById(signupRequest.getLoginId());
         if (member == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("Signup successful, but failed to retrieve member details", null, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
         // JWT 토큰 생성
         String token = jwtUtil.generateToken(member.getLoginId());
 
-        // 응답 반환
-        LoginResponse response = new LoginResponse("Signup and login successful", member.getNickname(), token);
+        // 응답 반환 - 토큰만 반환
+        SignupResponse response = new SignupResponse(token);
         return ResponseEntity.ok(response);
     }
 
@@ -130,5 +132,11 @@ public class SignupController {
     public ResponseEntity<String> deleteMember() {
         signupService.deleteCurrentUser();
         return ResponseEntity.ok("Your account has been deleted.");
+    }
+
+    @PatchMapping("/changenickname")
+    public ResponseEntity<String> changeNickname(@RequestBody NicknameChangeRequest request) {
+        signupService.changeNickname(request.getNewNickname());
+        return ResponseEntity.ok("Nickname has been changed successfully.");
     }
 }

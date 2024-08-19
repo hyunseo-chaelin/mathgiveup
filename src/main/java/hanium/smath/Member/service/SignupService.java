@@ -82,4 +82,17 @@ public class SignupService {
         // 해당 사용자의 이메일로 이메일 인증 정보 삭제
         emailVerificationRepository.deleteByEmail(member.getEmail());
     }
+
+    @Transactional
+    public void changeNickname(String newNickname) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserLoginId = authentication.getName(); // JWT에서 추출된 사용자 loginId
+
+        Member member = signupRepository.findByLoginId(currentUserLoginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with loginId: " + currentUserLoginId));
+
+        // 닉네임 변경
+        member.setNickname(newNickname);
+        signupRepository.save(member);
+    }
 }
