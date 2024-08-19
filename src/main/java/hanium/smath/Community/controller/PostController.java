@@ -59,7 +59,7 @@ public class PostController {
         Post post = Post.builder()
                 .title(postRequest.getTitle())
                 .content(postRequest.getContent())
-                .postType(postRequest.getPostType())
+//                .postType(postRequest.getPostType())
                 .member(member)
                 .build();
 
@@ -70,7 +70,7 @@ public class PostController {
                             .id(savedPost.getIdPost())
                             .title(savedPost.getTitle())
                             .content(savedPost.getContent())
-                            .postType(savedPost.getPostType())
+//                            .postType(savedPost.getPostType())
                             .createdTime(savedPost.getCreatedTime().toString())
                             .updatedTime(savedPost.getUpdatedTime().toString())
                             .build();

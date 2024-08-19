@@ -30,9 +30,9 @@ public class Post {
     @Column(name = "content", length = 1000, nullable = false)
     private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "post_type", nullable = false)
-    private PostType postType;
+////    @Enumerated(EnumType.STRING)
+//    @Column(name = "post_type", nullable = false)
+//    private String postType;
 
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
