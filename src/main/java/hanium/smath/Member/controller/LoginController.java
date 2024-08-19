@@ -59,15 +59,15 @@ public class LoginController {
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("RequestBody received: " + loginRequest);
 
-        if (loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
-            System.out.println("Login_id is empty.");
-            return ResponseEntity.badRequest().body(new LoginResponse("Login_id is empty.", null, null));
-        }
-
-        if (loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
-            System.out.println("Login_pwd is empty.");
-            return ResponseEntity.badRequest().body(new LoginResponse("Login_pwd is empty.", null, null));
-        }
+//        if (loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
+//            System.out.println("Login_id is empty.");
+//            return ResponseEntity.badRequest().body(new LoginResponse("Login_id is empty.", null, null));
+//        }
+//
+//        if (loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
+//            System.out.println("Login_pwd is empty.");
+//            return ResponseEntity.badRequest().body(new LoginResponse("Login_pwd is empty.", null, null));
+//        }
 
         try {
             System.out.println("Login request received for ID: " + loginRequest.getLogin_id());
@@ -75,7 +75,7 @@ public class LoginController {
 
             if (member != null) {
                 System.out.println("Member found : " + loginRequest.getLogin_id());
-                if (passwordEncoder.matches(loginRequest.getLogin_pwd(), loginRequest.getLogin_pwd())) {
+                if (passwordEncoder.matches(loginRequest.getLogin_pwd(), member.getLoginPwd())) {
                     String token;
                     if (loginRequest.isAutoLogin()) {
                         System.out.println("Generating token with extended expiry for ID: " + loginRequest.getLogin_id());
