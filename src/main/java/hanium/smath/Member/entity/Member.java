@@ -54,6 +54,9 @@ public class Member {
     @Column(name = "is_admin", nullable = false)
     private boolean isAdmin;
 
+    @Column(name="icon", nullable = false)
+    private String icon;
+
     @Column(name = "google_id", nullable = true, unique = true)
     private String googleId; // 구글 아이디 추가
 

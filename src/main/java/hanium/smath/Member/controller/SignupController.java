@@ -1,11 +1,8 @@
 package hanium.smath.Member.controller;
 
-import hanium.smath.Member.dto.NicknameChangeRequest;
-import hanium.smath.Member.dto.SignupResponse;
+import hanium.smath.Member.dto.*;
 import hanium.smath.Member.security.JwtUtil;
 import hanium.smath.Member.security.JwtRequestFilter;
-import hanium.smath.Member.dto.LoginResponse;
-import hanium.smath.Member.dto.SignupRequest;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.repository.EmailVerificationRepository;
@@ -134,9 +131,15 @@ public class SignupController {
         return ResponseEntity.ok("Your account has been deleted.");
     }
 
-    @PatchMapping("/changenickname")
+    @PatchMapping("/change_nickname")
     public ResponseEntity<String> changeNickname(@RequestBody NicknameChangeRequest request) {
         signupService.changeNickname(request.getNewNickname());
         return ResponseEntity.ok("Nickname has been changed successfully.");
+    }
+
+    @PatchMapping("/change_icon")
+    public ResponseEntity<String> changeIcon(@RequestBody IconChangeRequest request) {
+        signupService.changeIcon(request.getNewIcon());
+        return ResponseEntity.ok("Icon has been changed successfully.");
     }
 }

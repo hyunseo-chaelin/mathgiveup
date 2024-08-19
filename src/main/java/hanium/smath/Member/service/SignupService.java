@@ -62,6 +62,7 @@ public class SignupService {
                 .birthdate(birthdate)
                 .grade(signupRequest.getGrade())
                 .isEmailVerified(true) // 이메일 인증 완료로 설정
+                .icon("icon1")
                 .build();
 
         signupRepository.save(member);
@@ -93,6 +94,19 @@ public class SignupService {
 
         // 닉네임 변경
         member.setNickname(newNickname);
+        signupRepository.save(member);
+    }
+
+    @Transactional
+    public void changeIcon(String newIcon) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserLoginId = authentication.getName(); // JWT에서 추출된 사용자 loginId
+
+        Member member = signupRepository.findByLoginId(currentUserLoginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with loginId: " + currentUserLoginId));
+
+        // 아이콘 변경
+        member.setIcon(newIcon);
         signupRepository.save(member);
     }
 }
