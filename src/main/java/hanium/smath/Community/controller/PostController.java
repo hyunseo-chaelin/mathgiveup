@@ -49,8 +49,9 @@ public class PostController {
                 });
     }
 
+
     @PostMapping
-    public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
+    public CompletableFuture<ResponseEntity<PostResponse>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
         String loginId = authentication.getName();
         Member member = loginRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found"));
@@ -63,9 +64,41 @@ public class PostController {
                 .build();
 
         return postService.savePost(post)
-                .thenApply(ResponseEntity::ok)
+                .thenApply(savedPost -> {
+                    // PostResponse DTO 생성
+                    PostResponse response = PostResponse.builder()
+                            .id(savedPost.getIdPost())
+                            .title(savedPost.getTitle())
+                            .content(savedPost.getContent())
+                            .postType(savedPost.getPostType())
+                            .createdTime(savedPost.getCreatedTime().toString())
+                            .updatedTime(savedPost.getUpdatedTime().toString())
+                            .build();
+
+                    return ResponseEntity.ok(response);
+                })
                 .exceptionally(ex -> ResponseEntity.status(500).build());
     }
+
+
+
+//    @PostMapping
+//    public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
+//        String loginId = authentication.getName();
+//        Member member = loginRepository.findByLoginId(loginId)
+//                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+//
+//        Post post = Post.builder()
+//                .title(postRequest.getTitle())
+//                .content(postRequest.getContent())
+//                .postType(postRequest.getPostType())
+//                .member(member)
+//                .build();
+//
+//        return postService.savePost(post)
+//                .thenApply(ResponseEntity::ok)
+//                .exceptionally(ex -> ResponseEntity.status(500).build());
+//    }
 
     @PatchMapping("/{id}")
     public CompletableFuture<ResponseEntity<String>> updatePost(@PathVariable("id") Long postId, @RequestBody PostRequest postRequest, Authentication authentication) {

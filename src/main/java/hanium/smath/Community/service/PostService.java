@@ -22,12 +22,18 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
-    public CompletableFuture<String> savePost(Post post) {
-        return CompletableFuture.supplyAsync(() -> {
-            Post savedPost = postRepository.save(post);
-            return savedPost.getUpdatedTime().toString();
-        });
+//    public CompletableFuture<String> savePost(Post post) {
+//        return CompletableFuture.supplyAsync(() -> {
+//            Post savedPost = postRepository.save(post);
+//            return savedPost.getUpdatedTime().toString();
+//        });
+//    }
+
+
+    public CompletableFuture<Post> savePost(Post post) {
+        return CompletableFuture.supplyAsync(() -> postRepository.save(post));
     }
+
 
     public CompletableFuture<List<PostResponse>> getPostsByLoginId(String login_id) {
         return CompletableFuture.supplyAsync(() -> {
