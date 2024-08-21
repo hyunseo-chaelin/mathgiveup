@@ -15,8 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/community/posts")
@@ -33,6 +33,47 @@ public class PostController {
         this.jwtUtil = jwtUtil;
     }
 
+    // 게시물 작성
+    @PostMapping
+    public CompletableFuture<ResponseEntity<PostResponse>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
+        String loginId = authentication.getName();
+        Member member = loginRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        Post post = Post.builder()
+                .title(postRequest.getTitle())
+                .content(postRequest.getContent())
+                .member(member)
+                .build();
+
+        return postService.savePost(post)
+                .thenApply(savedPost -> {
+                    PostResponse response = PostResponse.builder()
+                            .id(savedPost.getIdPost())
+                            .title(savedPost.getTitle())
+                            .content(savedPost.getContent())
+                            .build();
+
+                    return ResponseEntity.ok(response);
+                })
+                .exceptionally(ex -> ResponseEntity.status(500).build());
+    }
+
+    // 전체 게시물 불러오기
+    @GetMapping("/all")
+    public CompletableFuture<ResponseEntity<List<PostResponse>>> getAllPosts() {
+        return postService.getAllPosts()
+                .thenApply(posts -> {
+                    System.out.println("Total posts retrieved: " + posts.size());
+                    return ResponseEntity.ok(posts);
+                })
+                .exceptionally(ex -> {
+                    System.err.println("Error in getAllPosts: " + ex.getMessage());
+                    return ResponseEntity.status(500).build();
+                });
+    }
+
+    // 내 게시물 불러오기
     @GetMapping("/my")
     public CompletableFuture<ResponseEntity<List<PostResponse>>> getMyPosts(@AuthenticationPrincipal UserDetails userDetails) {
         String loginId = userDetails.getUsername();
@@ -49,57 +90,7 @@ public class PostController {
                 });
     }
 
-
-    @PostMapping
-    public CompletableFuture<ResponseEntity<PostResponse>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
-        String loginId = authentication.getName();
-        Member member = loginRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        Post post = Post.builder()
-                .title(postRequest.getTitle())
-                .content(postRequest.getContent())
-//                .postType(postRequest.getPostType())
-                .member(member)
-                .build();
-
-        return postService.savePost(post)
-                .thenApply(savedPost -> {
-                    // PostResponse DTO 생성
-                    PostResponse response = PostResponse.builder()
-                            .id(savedPost.getIdPost())
-                            .title(savedPost.getTitle())
-                            .content(savedPost.getContent())
-//                            .postType(savedPost.getPostType())
-                            .createdTime(savedPost.getCreatedTime().toString())
-                            .updatedTime(savedPost.getUpdatedTime().toString())
-                            .build();
-
-                    return ResponseEntity.ok(response);
-                })
-                .exceptionally(ex -> ResponseEntity.status(500).build());
-    }
-
-
-
-//    @PostMapping
-//    public CompletableFuture<ResponseEntity<String>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
-//        String loginId = authentication.getName();
-//        Member member = loginRepository.findByLoginId(loginId)
-//                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-//
-//        Post post = Post.builder()
-//                .title(postRequest.getTitle())
-//                .content(postRequest.getContent())
-//                .postType(postRequest.getPostType())
-//                .member(member)
-//                .build();
-//
-//        return postService.savePost(post)
-//                .thenApply(ResponseEntity::ok)
-//                .exceptionally(ex -> ResponseEntity.status(500).build());
-//    }
-
+    // 게시물 수정
     @PatchMapping("/{id}")
     public CompletableFuture<ResponseEntity<String>> updatePost(@PathVariable("id") Long postId, @RequestBody PostRequest postRequest, Authentication authentication) {
         String loginId = authentication.getName();
@@ -108,6 +99,7 @@ public class PostController {
                 .exceptionally(ex -> ResponseEntity.status(500).build());
     }
 
+    // 게시물 삭제
     @DeleteMapping("/{id}")
     public CompletableFuture<ResponseEntity<Void>> deletePost(@PathVariable("id") Long postId, Authentication authentication) {
         String loginId = authentication.getName();

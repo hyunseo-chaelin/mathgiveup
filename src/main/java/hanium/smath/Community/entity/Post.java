@@ -3,9 +3,8 @@ package hanium.smath.Community.entity;
 import hanium.smath.Member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Timestamp;
+import java.util.List;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,12 +29,12 @@ public class Post {
     @Column(name = "content", length = 1000, nullable = false)
     private String content;
 
-////    @Enumerated(EnumType.STRING)
-//    @Column(name = "post_type", nullable = false)
-//    private String postType;
-
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
+
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> comments;
 
     @PrePersist
     protected void onCreate() {

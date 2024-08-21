@@ -22,19 +22,25 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
-//    public CompletableFuture<String> savePost(Post post) {
-//        return CompletableFuture.supplyAsync(() -> {
-//            Post savedPost = postRepository.save(post);
-//            return savedPost.getUpdatedTime().toString();
-//        });
-//    }
-
-
+    // 게시글 저장
     public CompletableFuture<Post> savePost(Post post) {
         return CompletableFuture.supplyAsync(() -> postRepository.save(post));
     }
 
+    // 게시글 불러오기 - 전체
+    public CompletableFuture<List<PostResponse>> getAllPosts() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Post> posts = postRepository.findAll();  // 모든 게시물 가져오기
+            return posts.stream().map(post -> PostResponse.builder()
+                            .id(post.getIdPost())
+                            .title(post.getTitle())
+                            .content(post.getContent())
+                            .build())
+                    .collect(Collectors.toList());
+        });
+    }
 
+    // 게시글 불러오기 - 아이디 찾아서
     public CompletableFuture<List<PostResponse>> getPostsByLoginId(String login_id) {
         return CompletableFuture.supplyAsync(() -> {
             List<Post> posts = postRepository.findByMemberLoginId(login_id);
@@ -42,9 +48,6 @@ public class PostService {
                             .id(post.getIdPost())
                             .title(post.getTitle())
                             .content(post.getContent())
-//                            .postType(post.getPostType())
-                            .createdTime(post.getCreatedTime().toString())
-                            .updatedTime(post.getUpdatedTime().toString())
                             .build())
                     .collect(Collectors.toList());
         });
@@ -63,7 +66,6 @@ public class PostService {
 
             post.setTitle(request.getTitle());
             post.setContent(request.getContent());
-//            post.setPostType(request.getPostType());
             postRepository.save(post);
 
             return post.getUpdatedTime().toString();
