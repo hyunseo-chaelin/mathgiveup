@@ -84,21 +84,21 @@ public class LoginController {
                         System.out.println("Generating token for ID: " + loginRequest.getLogin_id());
                         token = jwtUtil.generateToken(member.getLoginId());
                     }
-                    LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token);
+                    LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token, member.getIcon());
 
                     System.out.println("Login successful for ID: " + loginRequest.getLogin_id());
                     return ResponseEntity.ok(response);
                 } else {
                     System.out.println("Invalid login_pwd for ID: " + loginRequest.getLogin_id());
-                    return ResponseEntity.status(401).body(new LoginResponse("Invalid login_pwd.", null, null));
+                    return ResponseEntity.status(401).body(new LoginResponse("Invalid login_pwd.", null, null, null));
                 }
             } else {
                 System.out.println("Invalid login_id: " + loginRequest.getLogin_id());
-                return ResponseEntity.status(401).body(new LoginResponse("Invalid login_id.", null, null));
+                return ResponseEntity.status(401).body(new LoginResponse("Invalid login_id.", null, null, null));
             }
         } catch (Exception e) {
             System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(500).body(new LoginResponse("Error during login: " + e.getMessage(), null, null));
+            return ResponseEntity.status(500).body(new LoginResponse("Error during login: " + e.getMessage(), null, null, null));
         }
     }
 
@@ -112,16 +112,16 @@ public class LoginController {
             if (member != null) {
                 System.out.println("Member found : " + member.getNickname());
                 String token = jwtUtil.generateToken(member.getLoginId());
-                LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token);
+                LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token, member.getIcon());
                 return ResponseEntity.ok(response);
             } else {
                 System.out.println("Failed to process Google login request");
-                return ResponseEntity.status(401).body(new LoginResponse("Login failed for Google ID", null, null));
+                return ResponseEntity.status(401).body(new LoginResponse("Login failed for Google ID", null, null, null));
             }
 
         } catch (Exception e) {
             System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(500).body(new LoginResponse("Error during login: " + e.getMessage(), null, null));
+            return ResponseEntity.status(500).body(new LoginResponse("Error during login: " + e.getMessage(), null, null, null));
         }
     }
 
@@ -141,16 +141,16 @@ public class LoginController {
                 // JWT 토큰 생성
                 String token = jwtUtil.generateToken(member.getLoginId());
                 System.out.println("Member found : " + member.getNickname());
-                LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token);
+                LoginResponse response = new LoginResponse("Login successful", member.getNickname(), token, member.getIcon());
                 return ResponseEntity.ok(response);
             } else {
                 System.out.println("Failed to process Kakao login request");
-                return ResponseEntity.status(401).body(new LoginResponse("Login failed for Kakao ID", null, null));
+                return ResponseEntity.status(401).body(new LoginResponse("Login failed for Kakao ID", null, null, null));
             }
 
         } catch (Exception e) {
             System.err.println("Error during Kakao login: " + e.getMessage());
-            return ResponseEntity.status(500).body(new LoginResponse("Error during Kakao login: " + e.getMessage(), null, null));
+            return ResponseEntity.status(500).body(new LoginResponse("Error during Kakao login: " + e.getMessage(), null, null, null));
         }
     }
 
