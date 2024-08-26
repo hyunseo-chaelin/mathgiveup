@@ -62,7 +62,7 @@ public class SignupService {
                 .birthdate(birthdate)
                 .grade(signupRequest.getGrade())
                 .isEmailVerified(true) // 이메일 인증 완료로 설정
-                .icon("icon1")
+                .icon("assets/images/icon1.png")
                 .build();
 
         signupRepository.save(member);
