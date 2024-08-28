@@ -63,6 +63,7 @@ public class CommentService {
                     .content(comment.getContent())
                     .postId(comment.getPost().getIdPost())
                     .loginId(comment.getMember().getLoginId())
+                    .nickname(comment.getMember().getNickname())
                     .createTime(comment.getCreatedTime().toString())
                     .updateTime(comment.getUpdatedTime().toString())
                     .build()).collect(Collectors.toList());
@@ -80,6 +81,7 @@ public class CommentService {
                     .content(comment.getContent())
                     .postId(comment.getPost().getIdPost())
                     .loginId(comment.getMember().getLoginId())
+                    .nickname(comment.getMember().getNickname())
                     .createTime(comment.getCreatedTime().toString())
                     .updateTime(comment.getUpdatedTime().toString())
                     .build()).collect(Collectors.toList());
