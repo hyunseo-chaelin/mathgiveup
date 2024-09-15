@@ -1,7 +1,7 @@
 package hanium.smath.Member.service;
 
 import hanium.smath.Member.entity.Member;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -17,16 +17,16 @@ import java.util.List;
 @Service("customMemberDetailsService")
 public class CustomMemberDetailsService implements UserDetailsService {
 
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public CustomMemberDetailsService(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
+    public CustomMemberDetailsService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = loginRepository.findByLoginId(username)
+        Member member = memberRepository.findByLoginId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with loginId: " + username));
 
             List<GrantedAuthority> authorities = new ArrayList<>();

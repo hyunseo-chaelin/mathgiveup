@@ -6,7 +6,7 @@ import hanium.smath.MyPage.entity.AchievementType;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.MyPage.repository.AchievementRepository;
 import hanium.smath.MyPage.repository.AchievementTypeRepository;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +24,11 @@ public class AchievementService {
     private AchievementTypeRepository achievementTypeRepository;
 
     @Autowired
-    private LoginRepository loginRepository;
+    private MemberRepository memberRepository;
 
     // 7일 및 30일 연속 학습 달성 뱃지 수여 메서드
     public void awardAchievementForConsecutiveLearningDays(String loginId, int consecutiveDays) {
-        Member member = loginRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
 
         if (consecutiveDays >= 7) {
@@ -58,7 +58,7 @@ public class AchievementService {
 
     // 연속 학습 데이터를 가져오는 메서드
     public AchievementResponse getConsecutiveLearningData(String loginId, int days) {
-        Member member = loginRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
 
         // 연속 학습 달성 횟수 계산
@@ -82,7 +82,7 @@ public class AchievementService {
     }
 
     public AchievementResponse getAllAchievements(String loginId) {
-        Member member = loginRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
 
         // 7일 연속 학습 달성 횟수 계산

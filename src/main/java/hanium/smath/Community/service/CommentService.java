@@ -7,7 +7,7 @@ import hanium.smath.Community.entity.Post;
 import hanium.smath.Community.repository.CommentRepository;
 import hanium.smath.Community.repository.PostRepository;
 import hanium.smath.Member.entity.Member;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,19 +20,19 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, LoginRepository loginRepository, PostRepository postRepository) {
+    public CommentService(CommentRepository commentRepository, MemberRepository memberRepository, PostRepository postRepository) {
         this.commentRepository = commentRepository;
-        this.loginRepository = loginRepository;
+        this.memberRepository = memberRepository;
         this.postRepository = postRepository;
     }
 
     public CompletableFuture<String> saveComment(CommentRequest request, String loginId) {
         return CompletableFuture.supplyAsync(() -> {
-            Member member = loginRepository.findByLoginId(loginId)
+            Member member = memberRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
             Post post = postRepository.findById(request.getPostId())
@@ -53,7 +53,7 @@ public class CommentService {
 
     public CompletableFuture<List<CommentResponse>> getCommentsByMemberId(String loginId) {
         return CompletableFuture.supplyAsync(() -> {
-            Member member = loginRepository.findByLoginId(loginId)
+            Member member = memberRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
             List<Comment> comments = commentRepository.findByMember(member);

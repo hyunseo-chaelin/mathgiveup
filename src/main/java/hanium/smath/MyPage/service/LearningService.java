@@ -1,6 +1,6 @@
 package hanium.smath.MyPage.service;
 
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import hanium.smath.MyPage.dto.LearningRecordResponse;
 import hanium.smath.MyPage.entity.LearningRecord;
 import hanium.smath.Member.entity.Member;
@@ -21,7 +21,7 @@ public class LearningService {
     private LearningRecordRepository repository;
 
     @Autowired
-    private LoginRepository loginRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private AchievementService achievementService;
@@ -35,7 +35,7 @@ public class LearningService {
             LocalDate endDate = ym.atEndOfMonth();
 
             // 로그인 ID를 이용해 멤버를 조회
-            Member member = loginRepository.findByLoginId(loginId)
+            Member member = memberRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
 
             // 이전 달부터 데이터를 가져오기 위해 startDate를 한 달 전으로 조정

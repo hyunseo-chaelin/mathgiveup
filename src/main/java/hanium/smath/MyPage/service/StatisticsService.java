@@ -5,7 +5,7 @@ import hanium.smath.MyPage.entity.GameSession;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.MyPage.entity.GameType;
 import hanium.smath.MyPage.repository.StatisticsRepository;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class StatisticsService {
     private StatisticsRepository statisticsRepository;
 
     @Autowired
-    private LoginRepository loginRepository;
+    private MemberRepository memberRepository;
 
     public CompletableFuture<DailyStatisticsResponse> getDailyStatistics(String login_id, LocalDate date) {
         System.out.println("Fetching daily statistics for user: " + login_id + " on date: " + date);
@@ -32,7 +32,7 @@ public class StatisticsService {
 
         return CompletableFuture.supplyAsync(() -> {
             // Member를 loginId로 조회
-            Member member = loginRepository.findByLoginId(login_id)
+            Member member = memberRepository.findByLoginId(login_id)
                     .orElseThrow(() -> new RuntimeException("Member not found"));
 
             List<GameSession> sessions = statisticsRepository.findByMember(member)
