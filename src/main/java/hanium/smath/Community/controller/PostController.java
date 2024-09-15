@@ -5,7 +5,7 @@ import hanium.smath.Community.dto.PostResponse;
 import hanium.smath.Community.entity.Post;
 import hanium.smath.Community.service.PostService;
 import hanium.smath.Member.entity.Member;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import hanium.smath.Member.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +22,13 @@ import java.util.concurrent.CompletableFuture;
 public class PostController {
 
     private final PostService postService;
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public PostController(PostService postService, LoginRepository loginRepository, JwtUtil jwtUtil) {
+    public PostController(PostService postService, MemberRepository memberRepository, JwtUtil jwtUtil) {
         this.postService = postService;
-        this.loginRepository = loginRepository;
+        this.memberRepository = memberRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -36,7 +36,7 @@ public class PostController {
     @PostMapping
     public CompletableFuture<ResponseEntity<PostResponse>> createPost(@RequestBody PostRequest postRequest, Authentication authentication) {
         String loginId = authentication.getName();
-        Member member = loginRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
         Post post = Post.builder()

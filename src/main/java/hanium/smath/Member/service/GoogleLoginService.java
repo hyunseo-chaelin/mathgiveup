@@ -1,6 +1,6 @@
 package hanium.smath.Member.service;
 import hanium.smath.Member.dto.GoogleLoginRequest;
-import hanium.smath.Member.service.LoginService;
+import hanium.smath.Member.service.MemberService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import hanium.smath.Member.entity.Member;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class GoogleLoginService {
 
     @Autowired
-    private LoginService loginService;
+    private MemberService memberService;
 
     @Autowired
     private GoogleIdTokenVerifierService googleIdTokenVerifier;
@@ -37,7 +37,7 @@ public class GoogleLoginService {
         System.out.println("Email: " + email);
         System.out.println("Name: " + name);
 
-        Member member = loginService.findByGoogleId(userId);
+        Member member = memberService.findByGoogleId(userId);
 
         if(member == null) {
             System.out.println("No existing member found. Creating new member.");
@@ -56,7 +56,7 @@ public class GoogleLoginService {
 
             // 생년월일을 기반으로 학년 계산
 
-            loginService.save(member);
+            memberService.save(member);
 
             System.out.println("Member created.");
             System.out.println("grade : " + member.getGrade());

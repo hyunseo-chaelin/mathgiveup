@@ -3,7 +3,7 @@ package hanium.smath.Member.service;
 import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.entity.Member;
 import hanium.smath.Member.repository.EmailVerificationRepository;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -25,16 +25,16 @@ import java.util.Random;
 public class EmailService {
     private final JavaMailSender javaMailSender;
     private final EmailVerificationRepository emailVerificationRepository;
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, LoginRepository loginRepository) {
+    public EmailService(JavaMailSender javaMailSender, EmailVerificationRepository emailVerificationRepository, MemberRepository memberRepository) {
         this.javaMailSender = javaMailSender;
         this.emailVerificationRepository = emailVerificationRepository;
-        this.loginRepository = loginRepository;
+        this.memberRepository = memberRepository;
     }
 
     //(Signup): 이메일만 받고 인증 코드를 전송
@@ -144,7 +144,7 @@ public class EmailService {
         System.out.println("EmailService: Saving verification code for loginId: " + loginId + ", code: " + code);
 
         // loginId를 기반으로 멤버를 찾습니다.
-        Member member = loginRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> {
                     System.out.println("EmailService: No member found with loginId: " + loginId);
                     return new IllegalArgumentException("No member found with loginId: " + loginId);

@@ -1,20 +1,6 @@
 package hanium.smath.MyPage.service;
 
-import hanium.smath.Member.repository.LoginRepository;
-import hanium.smath.MyPage.dto.LearningRecordResponse;
-import hanium.smath.MyPage.entity.LearningRecord;
-import hanium.smath.Member.entity.Member;
-import hanium.smath.MyPage.repository.LearningRecordRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import hanium.smath.MyPage.dto.LearningRecordResponse;
 import hanium.smath.MyPage.entity.LearningRecord;
 import hanium.smath.Member.entity.Member;
@@ -35,7 +21,7 @@ public class LearningService {
     private LearningRecordRepository repository;
 
     @Autowired
-    private LoginRepository loginRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private AchievementService achievementService;
@@ -55,7 +41,7 @@ public class LearningService {
 
             // 로그인 ID를 이용해 멤버 조회
             System.out.println("Attempting to find member by loginId: " + loginId);
-            Member member = loginRepository.findByLoginId(loginId)
+            Member member = memberRepository.findByLoginId(loginId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid Member ID"));
             System.out.println("Found member: " + member);
 
@@ -85,7 +71,7 @@ public class LearningService {
             achievementService.awardAchievementForConsecutiveLearningDays(loginId, (int) consecutiveDays);
             System.out.println("Achievement award check completed.");
 
-            // 결과 생성
+            // 연속 학습일 및 학습 날짜 리스트를 포함한 응답 생성
             LearningRecordResponse response = new LearningRecordResponse(yearMonth, learningDays, consecutiveDays);
             System.out.println("Created LearningRecordResponse: " + response);
 
