@@ -53,6 +53,7 @@ public class LearningService {
             LocalDate endDate = ym.atEndOfMonth();
             System.out.println("Calculated startDate: " + startDate + ", endDate: " + endDate);
 
+            //Member member = memberRepository.findByLoginId(loginId)
             // 로그인 ID를 이용해 멤버 조회
             System.out.println("Attempting to find member by loginId: " + loginId);
             Member member = memberRepository.findByLoginId(loginId)
