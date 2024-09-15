@@ -8,7 +8,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
-public interface LoginRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>{
+    // 로그인 아이디가 이미 존재하는지 확인
+    boolean existsByLoginId(String loginId);
+    // 이메일이 이미 존재하는지 확인
+    boolean existsByEmail(String email);
+
     Optional<Member> findByEmailAndBirthdate(String email, LocalDate birthdate);
     Optional<Member> findByLoginId(String loginId);
     Optional<Member> findByGoogleId(String googleId);

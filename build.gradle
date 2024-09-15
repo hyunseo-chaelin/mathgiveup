@@ -83,6 +83,8 @@ dependencies {
 //    //kakao
 //    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 
+    // 실시간 게임
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
 
 }
