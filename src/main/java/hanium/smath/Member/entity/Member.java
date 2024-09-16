@@ -37,23 +37,23 @@ public class Member {
     @Column(name = "grade", length = 10, nullable = true)
     private Integer grade;
 
-    @Column(name = "id_level", nullable = false)
+    @Column(name = "id_level", nullable = true)
     private int idLevel;
 
-    @Column(name = "birthdate", nullable = false)
+    @Column(name = "birthdate", nullable = true)
     private LocalDate birthdate;
 
-    @Column(name = "is_email_verified", nullable = false)
+    @Column(name = "is_email_verified", nullable = true)
     private boolean isEmailVerified;
 
     @CreationTimestamp
-    @Column(name = "create_time", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "create_time", nullable = true, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createTime;
 
-    @Column(name = "is_admin", nullable = false)
+    @Column(name = "is_admin", nullable = true)
     private boolean isAdmin;
 
-    @Column(name="icon", nullable = false)
+    @Column(name="icon", nullable = true)
     private String icon;
 
     @Column(name = "google_id", nullable = true, unique = true)

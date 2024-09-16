@@ -36,6 +36,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/achievements/**").hasRole("USER")
                         .requestMatchers("/api/community/posts/**").hasRole("USER")
                         .requestMatchers("/api/community/comments/**").hasRole("USER")
+
+                        // 공지사항 관련 권한 설정
+                        .requestMatchers("/notices/new", "/notices/edit/**", "/notices/delete/**").hasRole("ADMIN")  // 관리자만 접근 가능
                         .anyRequest().permitAll()
                 )
 

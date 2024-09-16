@@ -29,14 +29,16 @@ public class CustomMemberDetailsService implements UserDetailsService {
         Member member = memberRepository.findByLoginId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with loginId: " + username));
 
-            List<GrantedAuthority> authorities = new ArrayList<>();
-        // 기본 권한을 USER로 설정
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = new ArrayList<>();
 
-        // 필요에 따라 추가적인 권한 설정, 여기 수정됨
-        if (member.isAdmin()) {
+        // 아이디가 "admin"일 경우 관리자로 설정하고, USER 권한을 생략
+        if ("admin".equals(username)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            // 기본 권한을 USER로 설정
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
+
         System.out.println("User found: " + member.getLoginId() + ", with authorities: " + authorities);
 
         return new User(member.getLoginId(), member.getLoginPwd(), authorities);
