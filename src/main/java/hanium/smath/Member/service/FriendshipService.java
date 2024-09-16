@@ -3,7 +3,7 @@ package hanium.smath.Member.service;
 import hanium.smath.Member.entity.Friendship;
 import hanium.smath.Member.repository.FriendshipRepository;
 import hanium.smath.Member.entity.Member;
-import hanium.smath.Member.repository.LoginRepository;
+import hanium.smath.Member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,18 +13,18 @@ import java.util.List;
 public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
-    private final LoginRepository loginRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public FriendshipService(FriendshipRepository friendshipRepository, LoginRepository loginRepository) {
+    public FriendshipService(FriendshipRepository friendshipRepository, MemberRepository memberRepository) {
         this.friendshipRepository = friendshipRepository;
-        this.loginRepository = loginRepository;
+        this.memberRepository = memberRepository;
     }
 
     public Friendship addFriend(String memberLoginId, String friendLoginId) {
-        Member member = loginRepository.findByLoginId(memberLoginId)
+        Member member = memberRepository.findByLoginId(memberLoginId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
-        Member friend = loginRepository.findByLoginId(friendLoginId)
+        Member friend = memberRepository.findByLoginId(friendLoginId)
                 .orElseThrow(() -> new RuntimeException("Friend not found"));
 
         if (friendshipRepository.findByMemberAndFriend(member, friend).isPresent()) {
@@ -41,9 +41,9 @@ public class FriendshipService {
     }
 
     public void acceptFriendRequest(String memberLoginId, String friendLoginId) {
-        Member member = loginRepository.findByLoginId(memberLoginId)
+        Member member = memberRepository.findByLoginId(memberLoginId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
-        Member friend = loginRepository.findByLoginId(friendLoginId)
+        Member friend = memberRepository.findByLoginId(friendLoginId)
                 .orElseThrow(() -> new RuntimeException("Friend not found"));
 
         Friendship friendship = friendshipRepository.findByMemberAndFriend(friend, member)
@@ -56,9 +56,9 @@ public class FriendshipService {
     }
 
     public void cancelFriendRequest(String memberLoginId, String friendLoginId) {
-        Member member = loginRepository.findByLoginId(memberLoginId)
+        Member member = memberRepository.findByLoginId(memberLoginId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
-        Member friend = loginRepository.findByLoginId(friendLoginId)
+        Member friend = memberRepository.findByLoginId(friendLoginId)
                 .orElseThrow(() -> new RuntimeException("Friend not found"));
 
         Friendship friendship = friendshipRepository.findByMemberAndFriend(member, friend)
@@ -72,9 +72,9 @@ public class FriendshipService {
     }
 
     public void rejectFriendRequest(String memberLoginId, String friendLoginId) {
-        Member member = loginRepository.findByLoginId(memberLoginId)
+        Member member = memberRepository.findByLoginId(memberLoginId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
-        Member friend = loginRepository.findByLoginId(friendLoginId)
+        Member friend = memberRepository.findByLoginId(friendLoginId)
                 .orElseThrow(() -> new RuntimeException("Friend not found"));
 
         Friendship friendship = friendshipRepository.findByMemberAndFriend(friend, member)
@@ -89,7 +89,7 @@ public class FriendshipService {
     }
 
     public List<Friendship> getFriends(String memberLoginId) {
-        Member member = loginRepository.findByLoginId(memberLoginId)
+        Member member = memberRepository.findByLoginId(memberLoginId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
         return friendshipRepository.findByMember(member);
