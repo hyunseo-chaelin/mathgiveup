@@ -2,6 +2,7 @@ package hanium.smath.Member.service;
 
 import hanium.smath.Member.entity.EmailVerification;
 import hanium.smath.Member.entity.Member;
+import hanium.smath.Member.entity.Rank;
 import hanium.smath.Member.repository.MemberRepository;
 import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.dto.SignupRequest;
@@ -178,5 +179,45 @@ public class MemberService {
                     save(newMember);
                     return newMember;
                 });
+    }
+
+    @Transactional
+    public Member updateSkillScoreAndRank(String loginId, int newScore) {
+        // 회원 조회
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with loginId: " + loginId));
+
+        // 새로운 스킬 점수 설정
+        member.setSkillScore(newScore);
+
+        // Rank 계산
+        Rank newRank = calculateRank(newScore);
+        member.setRank(newRank);
+
+        // 변경 사항 저장
+        memberRepository.save(member);
+
+        return member;
+    }
+
+    // Rank 계산 로직
+    private Rank calculateRank(int skillScore) {
+        if (skillScore >= 10) {
+            return Rank.GOLD;
+        } else if (skillScore >= 7) {
+            return Rank.SILVER;
+        } else if (skillScore >= 3) {
+            return Rank.BRONZE;
+        } else {
+            throw new IllegalArgumentException("Invalid skill score");
+        }
+    }
+
+    public void updateSkillScore(String loginId, int newScore) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        member.setSkillScore(newScore);  // 새로운 점수 설정 (수정됨)
+        memberRepository.save(member);
     }
 }

@@ -14,12 +14,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.service.annotation.GetExchange;
+
 
 @RestController
 @RequestMapping("/api/members")
@@ -369,4 +374,27 @@ public class MemberController {
             return ResponseEntity.status(400).body("Failed to change password.");
         }
     }
+
+    @PatchMapping("/update-skill-score")
+    public ResponseEntity<UpdateSkillScoreResponse> updateSkillScore(@RequestBody UpdateSkillScoreRequest request) {
+        try {
+            // JWT에서 로그인 ID 추출
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loginId = authentication.getName();  // 'getName()' 사용
+
+            // 점수 및 Rank 업데이트
+            Member updatedMember = memberService.updateSkillScoreAndRank(loginId, request.getNewScore());
+
+            // 응답 생성
+            UpdateSkillScoreResponse response = new UpdateSkillScoreResponse();
+            response.setRankLevel(updatedMember.getRank().name());  // Rank enum 값을 문자열로 반환
+            response.setSkillScore(updatedMember.getSkillScore());
+            response.setNickname(updatedMember.getNickname());
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
 }

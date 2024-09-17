@@ -59,6 +59,13 @@ public class Member {
     @Column(name = "google_id", nullable = true, unique = true)
     private String googleId; // 구글 아이디 추가
 
-    @Column(name = "kakaoId", nullable = true, unique = true)
-    private String kakaoId; // 구글 아이디 추가
+    @Column(name = "kakao_id", nullable = true, unique = true)
+    private String kakaoId;
+
+    @Column(name = "skill_score", nullable = false)  // nullable을 false로 설정
+    private Integer skillScore = 0;  // 기본값 0 설정 (수정됨)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rank_level", nullable = true)  // 컬럼 이름 변경
+    private Rank rank;
 }
