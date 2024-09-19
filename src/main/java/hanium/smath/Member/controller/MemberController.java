@@ -16,15 +16,12 @@ import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.service.annotation.GetExchange;
-
 
 @RestController
 @RequestMapping("/api/members")
@@ -172,16 +169,6 @@ public class MemberController {
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
         System.out.println("RequestBody received: " + loginRequest);
 
-//        if (loginRequest.getLogin_id() == null || loginRequest.getLogin_id().isEmpty()) {
-//            System.out.println("Login_id is empty.");
-//            return ResponseEntity.badRequest().body(new LoginResponse("Login_id is empty.", null, null));
-//        }
-//
-//        if (loginRequest.getLogin_pwd() == null || loginRequest.getLogin_pwd().isEmpty()) {
-//            System.out.println("Login_pwd is empty.");
-//            return ResponseEntity.badRequest().body(new LoginResponse("Login_pwd is empty.", null, null));
-//        }
-
         try {
             System.out.println("Login request received for ID: " + loginRequest.getLogin_id());
             Member member = memberService.getMemberById(loginRequest.getLogin_id());
@@ -219,7 +206,6 @@ public class MemberController {
     public ResponseEntity<LoginResponse> googleLogin(@RequestBody GoogleLoginRequest request) {
         try {
             System.out.println("ID Token received: " + request.getIdToken());
-
             Member member = googleLoginService.processGoogleLogin(request);
 
             if (member != null) {
