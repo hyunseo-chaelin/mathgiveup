@@ -59,6 +59,7 @@ public class Member {
     @Column(name = "kakao_id", nullable = true, unique = true)
     private String kakaoId;
 
+    @Builder.Default
     @Column(name = "skill_score", nullable = true)  // nullable을 false로 설정
     private Integer skillScore = 0;  // 기본값 0 설정 (수정됨)
 
