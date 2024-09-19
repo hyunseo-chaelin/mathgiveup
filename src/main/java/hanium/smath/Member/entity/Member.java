@@ -50,9 +50,6 @@ public class Member {
     @Column(name = "create_time", nullable = true, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createTime;
 
-    @Column(name = "is_admin", nullable = true)
-    private boolean isAdmin;
-
     @Column(name="icon", nullable = true)
     private String icon;
 
