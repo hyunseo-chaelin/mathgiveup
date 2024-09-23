@@ -14,9 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
-import java.util.concurrent.*;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.*;
+
 
 @Service
 public class MemberService {
@@ -219,5 +222,34 @@ public class MemberService {
 
         member.setSkillScore(newScore);  // 새로운 점수 설정 (수정됨)
         memberRepository.save(member);
+    }
+
+
+
+    //알림
+    public List<Member> findMembersInactiveFor24Hours() {
+        LocalDateTime timeLimit = LocalDateTime.now().minusHours(24);
+        Timestamp timestamp = Timestamp.valueOf(timeLimit);
+        return memberRepository.findMembersInactiveFor24Hours(timestamp);
+    }
+
+    public void updateLastLoginTime(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
+
+        // 현재 시간을 LocalDateTime으로 가져온 후 Timestamp로 변환
+        LocalDateTime currentTime = LocalDateTime.now();
+        member.setLastLoginTime(Timestamp.valueOf(currentTime));
+
+        memberRepository.save(member);
+    }
+
+    public LocalDateTime getLastLoginTime(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid member ID"));
+
+        // Timestamp를 LocalDateTime으로 변환
+        Timestamp lastLoginTime = member.getLastLoginTime();
+        return (lastLoginTime != null) ? lastLoginTime.toLocalDateTime() : null;
     }
 }

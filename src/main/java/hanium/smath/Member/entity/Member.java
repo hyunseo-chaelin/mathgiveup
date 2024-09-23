@@ -64,6 +64,10 @@ public class Member {
     private Integer skillScore = 0;  // 기본값 0 설정 (수정됨)
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rank_level", nullable = true)  // 컬럼 이름 변경
+    @Column(name = "rank_level", nullable = true)
     private Rank rank;
+
+    // 마지막 로그인 시간 추가
+    @Column(name = "last_login_time", nullable = true)
+    private Timestamp lastLoginTime;  // 마지막 로그인 시간
 }
