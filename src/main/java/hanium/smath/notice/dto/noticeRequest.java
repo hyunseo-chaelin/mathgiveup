@@ -1,11 +1,11 @@
-package hanium.smath.Notice.dto;
+package hanium.smath.notice.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class NoticeRequest {
+public class noticeRequest {
     private String title;
     private String content;
 }

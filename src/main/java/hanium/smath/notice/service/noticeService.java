@@ -1,8 +1,7 @@
-package hanium.smath.Notice.service;
+package hanium.smath.notice.service;
 
-import hanium.smath.Notice.entity.Notice; // 수정됨
-import hanium.smath.Notice.repository.NoticeRepository;
-import hanium.smath.Notice.dto.NoticeRequest;
+import hanium.smath.notice.entity.notice; // 수정됨
+import hanium.smath.notice.dto.noticeRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,22 +9,22 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class NoticeService {
+public class noticeService {
 
-    private final NoticeRepository noticeRepository;
+    private final hanium.smath.notice.repository.noticeRepository noticeRepository;
 
-    public NoticeService(NoticeRepository noticeRepository) {
+    public noticeService(hanium.smath.notice.repository.noticeRepository noticeRepository) {
         this.noticeRepository = noticeRepository;
     }
 
     @Transactional(readOnly = true)
-    public List<Notice> findAll() {
+    public List<notice> findAll() {
         return noticeRepository.findAll();
     }
 
     @Transactional
-    public Notice create(NoticeRequest noticeRequest, String author) {
-        Notice notice = new Notice();
+    public notice create(noticeRequest noticeRequest, String author) {
+        notice notice = new notice();
         notice.setTitle(noticeRequest.getTitle());
         notice.setContent(noticeRequest.getContent());
         notice.setAuthor(author); // author 설정
@@ -35,10 +34,10 @@ public class NoticeService {
 
 
     @Transactional
-    public Notice update(Long id, NoticeRequest noticeRequest) {
-        Optional<Notice> optionalNotice = noticeRepository.findById(id);
+    public notice update(Long id, noticeRequest noticeRequest) {
+        Optional<notice> optionalNotice = noticeRepository.findById(id);
         if (optionalNotice.isPresent()) {
-            Notice notice = optionalNotice.get();
+            notice notice = optionalNotice.get();
             notice.setTitle(noticeRequest.getTitle());
             notice.setContent(noticeRequest.getContent());
             return noticeRepository.save(notice);
@@ -49,7 +48,7 @@ public class NoticeService {
 
     @Transactional
     public void delete(Long id) {
-        Optional<Notice> optionalNotice = noticeRepository.findById(id);
+        Optional<notice> optionalNotice = noticeRepository.findById(id);
         if (optionalNotice.isPresent()) {
             noticeRepository.delete(optionalNotice.get());
         } else {
