@@ -1,4 +1,4 @@
-package hanium.smath.Notice.dto;
+package hanium.smath.notice.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class NoticeResponse {
+public class noticeResponse {
     private Long id; // 게시글 고유 번호
     private String title;
     private String content;
@@ -17,7 +17,7 @@ public class NoticeResponse {
     private LocalDateTime createTime;
 
     // public 생성자 추가
-    public NoticeResponse(Long id, String title, String content, String nickname, LocalDateTime createTime) {
+    public noticeResponse(Long id, String title, String content, String nickname, LocalDateTime createTime) {
         this.id = id;
         this.title = title;
         this.content = content;

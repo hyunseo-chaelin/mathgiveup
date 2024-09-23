@@ -1,4 +1,4 @@
-package hanium.smath.Notice.entity;
+package hanium.smath.notice.entity;
 
 import lombok.*;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Notice {
+public class notice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
