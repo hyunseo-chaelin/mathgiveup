@@ -1,4 +1,4 @@
-package hanium.smath.Notice.Repository;
+package hanium.smath.Notice.repository;
 
 import hanium.smath.Notice.entity.Notice; // 수정됨
 import org.springframework.data.jpa.repository.JpaRepository;

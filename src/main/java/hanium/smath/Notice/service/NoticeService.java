@@ -1,12 +1,11 @@
 package hanium.smath.Notice.service;
 
 import hanium.smath.Notice.entity.Notice; // 수정됨
-import hanium.smath.Notice.Repository.NoticeRepository;
+import hanium.smath.Notice.repository.NoticeRepository;
 import hanium.smath.Notice.dto.NoticeRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
