@@ -8,6 +8,7 @@ import hanium.smath.Member.repository.EmailVerificationRepository;
 import hanium.smath.Member.dto.SignupRequest;
 import hanium.smath.Member.dto.KakaoProfile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -149,9 +150,11 @@ public class MemberService {
     }
 
     public boolean changeUserPassword(String email, String newPassword) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return memberRepository.findByEmail(email)
                 .map(member -> {
-                    member.setLoginPwd(newPassword);
+                    String encodedPassword = passwordEncoder.encode(newPassword);  // 비밀번호 암호화
+                    member.setLoginPwd(encodedPassword);
                     memberRepository.save(member);
                     return true;
                 })
