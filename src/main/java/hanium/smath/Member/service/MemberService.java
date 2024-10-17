@@ -39,19 +39,15 @@ public class MemberService {
     public boolean checkLoginIdExists(String loginId) {
         return memberRepository.existsByLoginId(loginId);
     }
-
     public boolean checkEmailExists(String email) {
         return memberRepository.existsByEmail(email);
     }
-
     public void sendVerificationCodeToEmail(String email) {
         emailService.sendVerificationCodeToEmailOnly(email);
     }
-
     public boolean verifyEmailCode(String email, int code) {
         return emailService.verifyEmailCodeByEmail(email, code);
     }
-
     public void registerMember(SignupRequest signupRequest) {
         EmailVerification emailVerification = emailVerificationRepository.findEmailVerificationByEmail(signupRequest.getEmail());
 
@@ -68,6 +64,7 @@ public class MemberService {
                 .name(signupRequest.getName())
                 .nickname(signupRequest.getNickname())
                 .birthdate(birthdate)
+                .school(signupRequest.getSchool())
                 .grade(signupRequest.getGrade())
                 .isEmailVerified(true) // 이메일 인증 완료로 설정
                 .icon("assets/images/icon1.png")

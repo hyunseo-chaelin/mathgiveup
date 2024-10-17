@@ -40,6 +40,9 @@ public class Member {
     @Column(name = "id_level", nullable = true)
     private int idLevel;
 
+    @Column(name = "school", nullable = true)
+    private String school;
+
     @Column(name = "birthdate", nullable = true)
     private LocalDate birthdate;
 
